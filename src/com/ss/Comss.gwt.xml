@@ -17,7 +17,6 @@
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
   <!-- Other module inherits                                      -->
-<inherits name="java.sql"/>
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='com.ss.client.Comss'/>
