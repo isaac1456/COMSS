@@ -25,13 +25,17 @@ import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.tree.Tree;
+import com.ss.shared.StatementSQL;
+
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Comss implements EntryPoint {
 
+
 	public void onModuleLoad() {
+		 
 
 		final TabSet tabSet = new TabSet();
 		tabSet.setTabBarPosition(Side.TOP);
@@ -45,10 +49,10 @@ public class Comss implements EntryPoint {
 		tabSet.addTab(tTabApp);
 		tabSet.addTab(tTabResult);
 
-		LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
+	/*	LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
 		hashMap.put("1", "uno");
 		hashMap.put("2", "dos");
-		hashMap.put("3", "tres");
+		hashMap.put("3", "tres");*/
 
 		ListGridField lgfName = new ListGridField("Name");
 		ListGridField lgfVersion = new ListGridField("Version");
@@ -61,7 +65,7 @@ public class Comss implements EntryPoint {
 		cbxapps.setTitle("Apps");
 		cbxapps.setValueField("Version");
 		cbxapps.setDisplayField("Name");
-		cbxapps.setValueMap(hashMap);
+		cbxapps.setValueMap( new StatementSQL().SelectApp());
 		cbxapps.setPickListFields(lgfName, lgfVersion);
 		cbxapps.setPickListWidth(240);
 		cbxapps.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
@@ -94,7 +98,7 @@ public class Comss implements EntryPoint {
 		mcbxmetrics.setUseInsertionOrder(false);
 		mcbxmetrics.setName("Metricas");
 		mcbxmetrics.setShowPending(true);
-		mcbxmetrics.setValueMap(hashMap);
+		mcbxmetrics.setValueMap( new StatementSQL().SelectApp());
 	//	mcbxmetrics.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
 		mcbxmetrics.setShowIcons(true);
 

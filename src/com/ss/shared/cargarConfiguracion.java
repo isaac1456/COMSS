@@ -1,4 +1,4 @@
-package com.ss.connection;
+package com.ss.shared;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,7 +15,9 @@ public class cargarConfiguracion {
 	public void cargarDatos() {
 
 		try {
-			p.load(new FileReader("/libs/config.properties"));
+			String localDir = System.getProperty("user.dir");
+			
+			p.load(new FileReader(localDir+"\\Resources\\config.properties"));
 	
 			bd = p.getProperty("bd");
 			User = p.getProperty("user");

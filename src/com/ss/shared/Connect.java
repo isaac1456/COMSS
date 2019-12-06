@@ -1,8 +1,10 @@
-package com.ss.connection;
+package com.ss.shared;
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
 
 
 
@@ -14,11 +16,13 @@ public class Connect {
 	public static Connection conectar()
 	{
 		Connection connection = null;
+		//boolean connected = true; 
 		   config.cargarDatos();
 		String connectionUrl = "jdbc:sqlserver://"+config.ipbd+":"+config.port+";databaseName="+config.bd+";user="+config.User+";password="+config.password+"";
 
 		try  {
 			 connection = DriverManager.getConnection(connectionUrl);
+			 
 			// Code here.
 		}
 		// Handle any errors that may have occurred.
