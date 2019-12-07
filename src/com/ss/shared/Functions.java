@@ -1,4 +1,4 @@
-package com.ss.client;
+package com.ss.shared;
 
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.form.fields.FormItemIcon;

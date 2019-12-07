@@ -4,11 +4,16 @@ import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 
 import org.junit.Test;
 
-import com.ss.shared.Connect;
-import com.ss.shared.StatementSQL;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.ss.client.GreetingService;
+import com.ss.client.GreetingServiceAsync;
+import com.ss.server.Connect;
+
 
 
 
@@ -22,8 +27,6 @@ public class TestConnectSQL {
 		
 		Connection connection = connect.conectar(); 
 		assertEquals(connection != null, true);	
-		new StatementSQL().SelectApp();
-			
 	}
 
 }

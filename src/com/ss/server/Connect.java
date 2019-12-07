@@ -1,4 +1,4 @@
-package com.ss.shared;
+package com.ss.server;
 
 
 import java.sql.Connection;

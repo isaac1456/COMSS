@@ -2,7 +2,11 @@ package com.ss.client;
 
 import java.util.LinkedHashMap;
 
+import org.apache.tools.zip.AsiExtraField;
+
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.types.Side;
@@ -25,18 +29,20 @@ import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.tree.Tree;
-import com.ss.shared.StatementSQL;
-
+import com.ss.shared.DataSources;
+import com.ss.shared.Functions;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Comss implements EntryPoint {
 
-
 	public void onModuleLoad() {
-		 
 
+		final GreetingServiceAsync gsa = GWT.create(GreetingService.class);
+		LinkedHashMap<String, String> hashMap = null;
+		// LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
+		// hashMap.put("wrq", "weqrwe");
 		final TabSet tabSet = new TabSet();
 		tabSet.setTabBarPosition(Side.TOP);
 		tabSet.setWidth("90%");
@@ -49,23 +55,18 @@ public class Comss implements EntryPoint {
 		tabSet.addTab(tTabApp);
 		tabSet.addTab(tTabResult);
 
-	/*	LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
-		hashMap.put("1", "uno");
-		hashMap.put("2", "dos");
-		hashMap.put("3", "tres");*/
-
 		ListGridField lgfName = new ListGridField("Name");
 		ListGridField lgfVersion = new ListGridField("Version");
 
 		final DynamicForm formApp = new DynamicForm();
 		formApp.setWidth(500);
 
-		SelectItem cbxapps = new SelectItem("apps");
+		final SelectItem cbxapps = new SelectItem("apps");
 		cbxapps.setWidth(240);
 		cbxapps.setTitle("Apps");
 		cbxapps.setValueField("Version");
 		cbxapps.setDisplayField("Name");
-		cbxapps.setValueMap( new StatementSQL().SelectApp());
+
 		cbxapps.setPickListFields(lgfName, lgfVersion);
 		cbxapps.setPickListWidth(240);
 		cbxapps.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
@@ -93,20 +94,20 @@ public class Comss implements EntryPoint {
 
 		// populationField.setValidators(integerRangeValidator);
 
-		MultiComboBoxItem mcbxmetrics = new MultiComboBoxItem();
+		final MultiComboBoxItem mcbxmetrics = new MultiComboBoxItem();
 		// mcbxmetrics.setWidth(240);
 		mcbxmetrics.setUseInsertionOrder(false);
 		mcbxmetrics.setName("Metricas");
 		mcbxmetrics.setShowPending(true);
-		mcbxmetrics.setValueMap( new StatementSQL().SelectApp());
-	//	mcbxmetrics.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
+
+		// mcbxmetrics.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
 		mcbxmetrics.setShowIcons(true);
 
 		formApp.setFields(new FormItem[] { cbxapps, txtnameapp, txtversionapp, mcbxmetrics });
-		
+
 		final DynamicForm formResult = new DynamicForm();
 		formResult.setWidth(500);
-		
+
 		Tree tree = new Tree();
 		tree.setRoot(DataSources.appRoot);
 
@@ -115,14 +116,30 @@ public class Comss implements EntryPoint {
 		iptiApp.setValueField("name");
 		iptiApp.setValueTree(tree);
 		iptiApp.setWidth(240);
-		
-		formResult.setItems(new FormItem[] {iptiApp});
-		
+
+		formResult.setItems(new FormItem[] { iptiApp });
+
 		tTabResult.setPane(formResult);
 
 		RootPanel.get("containerMain").add(tabSet);
 		// tabSet.draw();
+		System.out.println("Result on post+result+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+
+		gsa.selectApp(new AsyncCallback<String>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub 	
+
+			}
+
+			@Override
+			public void onSuccess(String result) {
+				System.out.println("Result on post"+result);
+
+			}
+		});
 
 	}
-
 }
