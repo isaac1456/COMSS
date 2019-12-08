@@ -3,13 +3,22 @@ package com.ss.server;
 import com.ss.client.GreetingService;
 import com.ss.shared.FieldVerifier;
 
+import co.com.ss.models.AppObj;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -28,12 +37,12 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 	static String port = "1433";
 
 	static String user = "root";
-    String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+	String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
 	static Connection connection = null;
+	LinkedHashMap<String, String> arrayList = null;
 
-
-	public  void conectar() {
+	public void conectar() {
 
 		// boolean connected = true;
 		// config.cargarDatos();
@@ -41,54 +50,67 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 			String connectionUrl = "jdbc:sqlserver://" + ipbd + ":" + port + ";databaseName=" + bd + ";user=" + user
 					+ ";password=" + password + "";
 			Class.forName(driver).newInstance();
-			
-			connection = DriverManager.getConnection(connectionUrl);
-			System.out.println("*********************************Conecto *************************************************");
 
+			connection = DriverManager.getConnection(connectionUrl);
+			System.out.println(
+					"*********************************Conecto *************************************************");
 
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-			System.out.println("*********************************Conecto *************************************************");
+			System.out.println(
+					"*********************************Conecto *************************************************");
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("*********************************Conecto *************************************************");
 
-		} 
+		}
 
 	}
 
 	public String selectApp() {
 		conectar();
 		ResultSet resultSet = null;
+		//arrayList = new LinkedHashMap<String, String>();
+		String localDir = System.getProperty("user.dir");
+		JSONArray appList = new JSONArray();
 	
-		String request = "";
 		System.out.println("*********************************entro*************************************************");
 		Statement statement;
 		try {
-			
-			String selectSql = "select apps.appName, version.versionName from apps, version where apps.idApp = version.app_fk; ";
+
+			String selectSql = "select apps.idApp, apps.appName, version.idVersion,version.versionName from apps, version where apps.idApp = version.app_fk; ";
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery(selectSql);
 			// hashMap.put("app name", "Version ");
-			System.out.println("*********************************before while*************************************************");
+			System.out.println(
+					"*********************************before while*************************************************");
 			while (resultSet.next()) {
-				System.out.println("*********************************while *************************************************");
-				// objapp = new AppObj(resultSet.getInt(1), resultSet.getString(2));
-				// s ListappObjs.add(objapp);
+				System.out.println("*********************************: " + resultSet.getString(2));
 
-				// hashMap.put(resultSet.getString(1), resultSet.getString(2));
-				request = resultSet.getString(1) + " " + resultSet.getString(2);
+				JSONObject appdetails = new JSONObject();
+				appdetails.put("idApp", resultSet.getInt(1));
+				appdetails.put("appName", resultSet.getString(2));
+				appdetails.put("idVersion", resultSet.getInt(3));
+				appdetails.put("versionName", resultSet.getString(4));
+
+				
+
+				appList.add(appdetails);
+			
+			
+
 				System.out.println(resultSet.getString(1) + " " + resultSet.getString(2));
 			}
-			System.out.println("*********************************After while *************************************************");
+			wirteJson(appList);
+
 		} catch (SQLException e) {
 
 			e.printStackTrace();
 		}
-		return request;
+	//	System.out.println("*********************************After while " + arrayList.size());
+		return localDir+"\\Resources\\apps.json";
 
 	}
 
@@ -123,5 +145,19 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 			return null;
 		}
 		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+	}
+
+	private void wirteJson(JSONArray array) {
+		String localDir = System.getProperty("user.dir");
+
+		try (FileWriter file = new FileWriter(localDir+"\\Resources\\apps.json")) {
+
+			file.write(array.toJSONString());
+			file.flush();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 }
