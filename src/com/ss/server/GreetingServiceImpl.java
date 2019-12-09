@@ -72,10 +72,48 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 	public String selectApp() {
 		conectar();
 		ResultSet resultSet = null;
-		//arrayList = new LinkedHashMap<String, String>();
+		// arrayList = new LinkedHashMap<String, String>();
 		String localDir = System.getProperty("user.dir");
 		JSONArray appList = new JSONArray();
-	
+
+		System.out.println("*********************************entro*************************************************");
+		Statement statement;
+		try {
+
+			String selectSql = "select apps.idApp, apps.appName from apps";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(selectSql);
+			// hashMap.put("app name", "Version ");
+
+			while (resultSet.next()) {
+
+				JSONObject appdetails = new JSONObject();
+				appdetails.put("idApp", resultSet.getInt(1));
+				appdetails.put("appName", resultSet.getString(2));
+				
+
+				appList.add(appdetails);
+
+				System.out.println(resultSet.getString(1) + " " + resultSet.getString(2));
+			}
+			wirteJson(appList, "apps");
+
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+		}
+
+		return localDir + "\\Resources\\apps.json";
+
+	}
+
+	public String insertMetrics() {
+		conectar();
+		ResultSet resultSet = null;
+		// arrayList = new LinkedHashMap<String, String>();
+		String localDir = System.getProperty("user.dir");
+		JSONArray appList = new JSONArray();
+
 		System.out.println("*********************************entro*************************************************");
 		Statement statement;
 		try {
@@ -95,22 +133,54 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 				appdetails.put("idVersion", resultSet.getInt(3));
 				appdetails.put("versionName", resultSet.getString(4));
 
-				
-
 				appList.add(appdetails);
-			
-			
 
 				System.out.println(resultSet.getString(1) + " " + resultSet.getString(2));
 			}
-			wirteJson(appList);
+			wirteJson(appList, "apps");
 
 		} catch (SQLException e) {
 
 			e.printStackTrace();
 		}
-	//	System.out.println("*********************************After while " + arrayList.size());
-		return localDir+"\\Resources\\apps.json";
+		// System.out.println("*********************************After while " +
+		// arrayList.size());
+		return localDir + "\\Resources\\apps.json";
+
+	}
+	
+	public String validarVersion(String id) {
+		conectar();
+		ResultSet resultSet = null;
+		Statement statement;
+		String result = "no";
+		System.out.println("----------------------------");
+		JSONArray appList = new JSONArray();
+		try {
+
+			String selectSql = "select * from version where app_fk =" + id
+					+ ";";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(selectSql);
+
+			while (resultSet.next()) {
+
+				JSONObject appdetails = new JSONObject();
+				
+				appdetails.put("idVersion", resultSet.getInt(1));
+				appdetails.put("versionName", resultSet.getString(2));
+
+				appList.add(appdetails);
+
+			}
+			wirteJson(appList, "version");
+
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+		}
+
+		return result;
 
 	}
 
@@ -147,10 +217,10 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 	}
 
-	private void wirteJson(JSONArray array) {
+	private void wirteJson(JSONArray array, String name) {
 		String localDir = System.getProperty("user.dir");
 
-		try (FileWriter file = new FileWriter(localDir+"\\Resources\\apps.json")) {
+		try (FileWriter file = new FileWriter(localDir + "\\Resources\\"+name+".json")) {
 
 			file.write(array.toJSONString());
 			file.flush();
@@ -160,4 +230,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 		}
 
 	}
+
+
+	
 }

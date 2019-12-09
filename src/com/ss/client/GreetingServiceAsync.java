@@ -12,5 +12,7 @@ import co.com.ss.models.AppObj;
  */
 public interface GreetingServiceAsync {
 	void greetServer(String input, AsyncCallback<String> callback) throws IllegalArgumentException;
-	void selectApp(AsyncCallback<String> asyncCallback); 
+	void selectApp(AsyncCallback<String> asyncCallback);
+	void insertMetrics(AsyncCallback<String> callback);
+	void validarVersion(String id, AsyncCallback<String> callback); 
 }

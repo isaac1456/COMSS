@@ -23,10 +23,10 @@ public class dataAppObj extends DataSource {
         
         DataSourceField idApp = new DataSourceField("idApp",FieldType.TEXT, "Id app");
         DataSourceField appName = new DataSourceField("appName", FieldType.TEXT,"Name App");
-        DataSourceField idVersion = new DataSourceField("idVersion", FieldType.TEXT,"Id Version");
-        DataSourceField versionName = new DataSourceField("versionName",FieldType.TEXT, "Name Version");
+      //  DataSourceField idVersion = new DataSourceField("idVersion", FieldType.TEXT,"Id Version");
+      //  DataSourceField versionName = new DataSourceField("versionName",FieldType.TEXT, "Name Version");
 		 
-        setFields(idApp, appName, idVersion, versionName);  
+        setFields(idApp, appName);  
         setDataURL("\\Resources\\apps.json");  
     }  
 

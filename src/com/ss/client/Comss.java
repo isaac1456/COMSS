@@ -1,22 +1,36 @@
 package com.ss.client;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.gargoylesoftware.htmlunit.javascript.host.Window;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.DSDataFormat;
 import com.smartgwt.client.types.Side;
 import com.smartgwt.client.types.VerticalAlignment;
+import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.FormItem;
+import com.smartgwt.client.widgets.form.fields.FormItemCriteriaFunction;
+import com.smartgwt.client.widgets.form.fields.FormItemFunctionContext;
 import com.smartgwt.client.widgets.form.fields.IPickTreeItem;
 import com.smartgwt.client.widgets.form.fields.MultiComboBoxItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.tab.Tab;
@@ -25,6 +39,7 @@ import com.smartgwt.client.widgets.tree.Tree;
 import com.ss.shared.DataSources;
 import com.ss.shared.Functions;
 import com.ss.shared.dataAppObj;
+import com.ss.shared.dataAppObjVersion;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -37,6 +52,7 @@ public class Comss implements EntryPoint {
 
 		// LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
 		// hashMap.put("wrq", "weqrwe");
+		Map<String, String[]> map = new HashMap<String, String[]>();
 		final TabSet tabSet = new TabSet();
 		tabSet.setTabBarPosition(Side.TOP);
 		tabSet.setWidth("90%");
@@ -45,25 +61,31 @@ public class Comss implements EntryPoint {
 		tabSet.setStyleName("containertabs");
 		Tab tTabApp = new Tab("Aplicaciones", "");
 		Tab tTabResult = new Tab("Resultados", "");
+		Tab tTabRegisteer = new Tab("Registro", "");
 
 		tabSet.addTab(tTabApp);
 		tabSet.addTab(tTabResult);
-	//	ListGridField lgfidApp = new ListGridField("idApp");
+		tabSet.addTab(tTabRegisteer);
+		// ListGridField lgfidApp = new ListGridField("idApp");
 		ListGridField lgfNameApp = new ListGridField("appName");
-		//ListGridField lgfidVersion = new ListGridField("idVersion");
+		// ListGridField lgfidVersion = new ListGridField("idVersion");
 		ListGridField lgfVersion = new ListGridField("versionName");
 
 		final DynamicForm formApp = new DynamicForm();
 		formApp.setWidth(500);
+		final TextItem txtNameCiclo = new TextItem();
 
 		final SelectItem cbxapps = new SelectItem("apps");
+		final SelectItem cbxVersion = new SelectItem();
 		gsa.selectApp(new AsyncCallback<String>() {
 
 			@Override
 			public void onSuccess(String result) {
-				  DataSource dataApp = dataAppObj.getInstance();  
+				DataSource dataApp = dataAppObj.getInstance();
+				// DataSource dataVersion = dataAppObjVersion.getInstance();
+
 				cbxapps.setOptionDataSource(dataApp);
-				
+				// cbxVersion.setOptionDataSource(dataVersion);
 
 			}
 
@@ -76,22 +98,65 @@ public class Comss implements EntryPoint {
 
 		cbxapps.setWidth(240);
 		cbxapps.setTitle("Apps");
-		cbxapps.setValueField("idVersion");
-		cbxapps.setDisplayField("versionName");
+		cbxapps.setValueField("idApp");
+		cbxapps.setDisplayField("appName");
+		cbxapps.setName("cbxAppName");
 
-		cbxapps.setPickListFields( lgfNameApp, lgfVersion);
+		cbxapps.setPickListFields(lgfNameApp);
 		cbxapps.setPickListWidth(240);
 		cbxapps.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
 		cbxapps.setShowIcons(true);
 
+		cbxapps.addChangedHandler(new ChangedHandler() {
+
+			@Override
+			public void onChanged(ChangedEvent event) {
+
+				gsa.validarVersion("" + event.getValue(), new AsyncCallback<String>() {
+
+					@Override
+					public void onFailure(Throwable caught) { // TODO Auto-generated
+
+					}
+
+					@Override
+					public void onSuccess(String result) {
+
+						
+
+						formApp.clearValue("cbxVersionName");
+						DataSource dataVersion = dataAppObjVersion.getInstance();
+						cbxVersion.setOptionDataSource(dataVersion);
+					}
+				});
+			}
+		});
+
+		cbxVersion.setWidth(240);
+		cbxVersion.setName("cbxVersionName");
+		cbxVersion.setTitle("Version");
+		cbxVersion.setValueField("versionName");
+		cbxVersion.setDisplayField("versionName");
+		cbxVersion.setPickListFields(lgfVersion);
+		cbxVersion.setPickListWidth(240);
+
+		cbxVersion.setPickListFilterCriteriaFunction(new FormItemCriteriaFunction() {
+			@Override
+			public Criteria getCriteria(FormItemFunctionContext itemContext) {
+				String version = (String) cbxapps.getValue();
+				Criteria criteria = new Criteria("idApp", version);
+				return criteria;
+			}
+		});
+
 		tTabApp.setPane(formApp);
 
-		final TextItem txtnameapp = new TextItem();
-		txtnameapp.setTitle("Nombre del ciclo");
-		txtnameapp.setWidth(240);
-		txtnameapp.setRequired(true);
-		txtnameapp.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
-		txtnameapp.setShowIcons(true);
+		txtNameCiclo.setTitle("Nombre del ciclo");
+		txtNameCiclo.setWidth(240);
+		txtNameCiclo.setRequired(true);
+		txtNameCiclo.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
+		txtNameCiclo.setShowIcons(true);
+		txtNameCiclo.setDisabled(true);
 
 		final MultiComboBoxItem mcbxmetrics = new MultiComboBoxItem();
 		// mcbxmetrics.setWidth(240);
@@ -109,7 +174,7 @@ public class Comss implements EntryPoint {
 		label.setValign(VerticalAlignment.CENTER);
 		label.setWrap(false);
 
-		formApp.setFields(new FormItem[] { cbxapps, txtnameapp, txtversionapp, mcbxmetrics });
+		formApp.setFields(new FormItem[] { cbxapps, cbxVersion, txtNameCiclo, mcbxmetrics });
 
 		final DynamicForm formResult = new DynamicForm();
 		formResult.setWidth(500);
@@ -122,22 +187,40 @@ public class Comss implements EntryPoint {
 		iptiApp.setValueField("name");
 		iptiApp.setValueTree(tree);
 		iptiApp.setWidth(240);
-		
-		final ListGrid grid = new ListGrid();  
-   
-        grid.setWidth100();  
-        grid.setHeight(100);  
-        grid.setAutoFetchData(true);  
 
 		formResult.setItems(new FormItem[] { iptiApp });
 
 		tTabResult.setPane(formResult);
 
+		final DynamicForm formRegisterApp = new DynamicForm();
+		formRegisterApp.setWidth(500);
+
+		TextItem nameApp = new TextItem();
+		nameApp.setTitle("Nombre de la App");
+		nameApp.setWidth(240);
+		nameApp.setRequired(true);
+
+		TextItem version = new TextItem();
+		version.setTitle("Version");
+		version.setWidth(240);
+		version.setRequired(true);
+
+		Button save = new Button("Save");
+		save.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		formRegisterApp.setFields(new FormItem[] { nameApp, version });
+
+		tTabRegisteer.setPane(formRegisterApp);
+
 		RootPanel.get("containerMain").add(tabSet);
-		RootPanel.get("containerMain").add(grid);
-		// tabSet.draw();
+
 		System.out.println("Result on post+result+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
-	
 	}
 }
