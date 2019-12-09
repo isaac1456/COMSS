@@ -12,4 +12,7 @@ public interface GreetingService extends RemoteService {
 	String selectApp() ; 
 	String insertMetrics(); 
 	String validarVersion(String id);
+	String selectAppaVersion();
+	String saveAppVersion(String app, String version);
+	
 }

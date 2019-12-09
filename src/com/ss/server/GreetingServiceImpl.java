@@ -97,6 +97,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 				System.out.println(resultSet.getString(1) + " " + resultSet.getString(2));
 			}
 			wirteJson(appList, "apps");
+			connection.close();
 
 		} catch (SQLException e) {
 
@@ -138,6 +139,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 				System.out.println(resultSet.getString(1) + " " + resultSet.getString(2));
 			}
 			wirteJson(appList, "apps");
+			connection.close();
 
 		} catch (SQLException e) {
 
@@ -174,6 +176,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 
 			}
 			wirteJson(appList, "version");
+			connection.close();
 
 		} catch (SQLException e) {
 
@@ -229,6 +232,86 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 			e.printStackTrace();
 		}
 
+	}
+
+	@Override
+	public String selectAppaVersion() {
+		conectar();
+		ResultSet resultSet = null;
+		// arrayList = new LinkedHashMap<String, String>();
+		String localDir = System.getProperty("user.dir");
+		JSONArray appList = new JSONArray();
+
+		System.out.println("*********************************entro*************************************************");
+		Statement statement;
+		try {
+
+			String selectSql = "select apps.idApp, apps.appName, version.idVersion,version.versionName from apps, version where apps.idApp = version.app_fk; ";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(selectSql);
+			// hashMap.put("app name", "Version ");
+			System.out.println(
+					"*********************************Select app Version *************************************************");
+			while (resultSet.next()) {
+				System.out.println("*********************************: " + resultSet.getString(2));
+
+				JSONObject appdetails = new JSONObject();
+				appdetails.put("idApp", resultSet.getInt(1));
+				appdetails.put("appName", resultSet.getString(2));
+				appdetails.put("idVersion", resultSet.getInt(3));
+				appdetails.put("versionName", resultSet.getString(4));
+
+				appList.add(appdetails);
+
+				System.out.println(resultSet.getString(1) + " " + resultSet.getString(2));
+			}
+			wirteJson(appList, "appVersion");
+
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+		}
+		// System.out.println("*********************************After while " +
+		// arrayList.size());
+		return localDir + "\\Resources\\appVersion.json";
+
+	}
+
+	@Override
+	public String saveAppVersion(String app, String version) {
+		conectar();
+		ResultSet resultSet = null;
+		Statement statement;
+		String result = "no";
+		System.out.println("----------------------------");
+	//	JSONArray appList = new JSONArray();
+		try {
+			int auxMax =0;
+
+			
+			String selectTop ="SELECT TOP 1 * FROM apps ORDER BY idApp DESC";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(selectTop);
+
+			if	 (resultSet.next()) {
+				auxMax = resultSet.getInt(1)+1;
+			}
+			String insertAppSql = "insert into apps (appName) values('"+app+"');";
+			String insertverSql = "insert into version (versionName, app_fk) values('"+version+"',"+auxMax+" );";
+			statement.executeUpdate(insertAppSql);
+			statement.executeUpdate(insertverSql); 
+			//wirteJson(appList, "version");
+			connection.close();
+
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+		}
+
+		return "si";
+
+		
+		
 	}
 
 

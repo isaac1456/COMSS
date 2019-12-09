@@ -33,13 +33,19 @@ import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
+import com.smartgwt.client.widgets.grid.events.RecordClickEvent;
+import com.smartgwt.client.widgets.grid.events.RecordClickHandler;
+import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
+import com.smartgwt.client.widgets.tab.events.TabSelectedEvent;
+import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 import com.smartgwt.client.widgets.tree.Tree;
 import com.ss.shared.DataSources;
 import com.ss.shared.Functions;
 import com.ss.shared.dataAppObj;
 import com.ss.shared.dataAppObjVersion;
+import com.ss.shared.dataAppReg;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -52,7 +58,7 @@ public class Comss implements EntryPoint {
 
 		// LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
 		// hashMap.put("wrq", "weqrwe");
-		Map<String, String[]> map = new HashMap<String, String[]>();
+		// Map<String, String[]> map = new HashMap<String, String[]>();
 		final TabSet tabSet = new TabSet();
 		tabSet.setTabBarPosition(Side.TOP);
 		tabSet.setWidth("90%");
@@ -104,8 +110,6 @@ public class Comss implements EntryPoint {
 
 		cbxapps.setPickListFields(lgfNameApp);
 		cbxapps.setPickListWidth(240);
-		cbxapps.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
-		cbxapps.setShowIcons(true);
 
 		cbxapps.addChangedHandler(new ChangedHandler() {
 
@@ -121,8 +125,6 @@ public class Comss implements EntryPoint {
 
 					@Override
 					public void onSuccess(String result) {
-
-						
 
 						formApp.clearValue("cbxVersionName");
 						DataSource dataVersion = dataAppObjVersion.getInstance();
@@ -191,16 +193,17 @@ public class Comss implements EntryPoint {
 		formResult.setItems(new FormItem[] { iptiApp });
 
 		tTabResult.setPane(formResult);
-
+		VLayout layoutRegister = new VLayout(15);
+		final ListGrid listGrid = new ListGrid();
 		final DynamicForm formRegisterApp = new DynamicForm();
 		formRegisterApp.setWidth(500);
 
-		TextItem nameApp = new TextItem();
+		final TextItem nameApp = new TextItem();
 		nameApp.setTitle("Nombre de la App");
 		nameApp.setWidth(240);
 		nameApp.setRequired(true);
 
-		TextItem version = new TextItem();
+		final TextItem version = new TextItem();
 		version.setTitle("Version");
 		version.setWidth(240);
 		version.setRequired(true);
@@ -209,14 +212,109 @@ public class Comss implements EntryPoint {
 		save.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				// TODO Auto-generated method stub
+				String name = nameApp.getDisplayValue();
+				String vers = version.getDisplayValue();
+				gsa.saveAppVersion(name, vers, new AsyncCallback<String>() {
 
+					@Override
+					public void onSuccess(String result) {
+
+						// TODO Auto-generated method stub
+						formRegisterApp.resetValues();
+						gsa.selectAppaVersion(new AsyncCallback<String>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								// TODO Auto-generated method stub
+
+							}
+
+							@Override
+							public void onSuccess(String result) {
+								// DataSource dataSAppReg = dataAppReg.getInstance();
+								// listGrid.setDataSource(dataAppReg.getInstance());
+
+								listGrid.refreshData();
+							}
+						});
+
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+				});
 			}
 		});
 
 		formRegisterApp.setFields(new FormItem[] { nameApp, version });
 
-		tTabRegisteer.setPane(formRegisterApp);
+		layoutRegister.addMember(formRegisterApp);
+		layoutRegister.addMember(save);
+
+		listGrid.setWidth100();
+		listGrid.setHeight100();
+		listGrid.setDataSource(dataAppReg.getInstance());
+		listGrid.setAutoFetchData(true);
+		listGrid.setShowAllRecords(true);
+
+		tTabRegisteer.addTabSelectedHandler(new TabSelectedHandler() {
+
+			@Override
+			public void onTabSelected(TabSelectedEvent event) {
+				// SC.say("entro en tab");
+
+				gsa.selectAppaVersion(new AsyncCallback<String>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onSuccess(String result) {
+						// DataSource dataSAppReg = dataAppReg.getInstance();
+						// listGrid.setDataSource(dataAppReg.getInstance());
+
+						listGrid.refreshData();
+					}
+				});
+
+			}
+		});
+
+		tTabApp.addTabSelectedHandler(new TabSelectedHandler() {
+
+			@Override
+			public void onTabSelected(TabSelectedEvent event) {
+				gsa.selectApp(new AsyncCallback<String>() {
+
+					@Override
+					public void onSuccess(String result) {
+						cbxapps.clearValue();
+						DataSource dataApp = dataAppObj.getInstance();
+						// DataSource dataVersion = dataAppObjVersion.getInstance();
+
+						cbxapps.setOptionDataSource(dataApp);
+						// cbxVersion.setOptionDataSource(dataVersion);
+
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+				});
+
+			}
+		});
+		layoutRegister.addMember(listGrid);
+
+		tTabRegisteer.setPane(layoutRegister);
 
 		RootPanel.get("containerMain").add(tabSet);
 

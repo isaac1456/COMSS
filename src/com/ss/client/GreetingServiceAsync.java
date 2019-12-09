@@ -14,5 +14,7 @@ public interface GreetingServiceAsync {
 	void greetServer(String input, AsyncCallback<String> callback) throws IllegalArgumentException;
 	void selectApp(AsyncCallback<String> asyncCallback);
 	void insertMetrics(AsyncCallback<String> callback);
-	void validarVersion(String id, AsyncCallback<String> callback); 
+	void validarVersion(String id, AsyncCallback<String> callback);
+	void selectAppaVersion(AsyncCallback<String> callback);
+	void saveAppVersion(String app, String version, AsyncCallback<String> callback); 
 }
