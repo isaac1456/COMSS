@@ -19,9 +19,10 @@ import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.Label;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
+
 import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.ButtonItem;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.FormItemCriteriaFunction;
 import com.smartgwt.client.widgets.form.fields.FormItemFunctionContext;
@@ -29,8 +30,12 @@ import com.smartgwt.client.widgets.form.fields.IPickTreeItem;
 import com.smartgwt.client.widgets.form.fields.MultiComboBoxItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.fields.events.ChangeEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangeHandler;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import com.smartgwt.client.widgets.form.fields.events.ClickEvent;
+import com.smartgwt.client.widgets.form.fields.events.ClickHandler;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.events.RecordClickEvent;
@@ -72,6 +77,7 @@ public class Comss implements EntryPoint {
 		tabSet.addTab(tTabApp);
 		tabSet.addTab(tTabResult);
 		tabSet.addTab(tTabRegisteer);
+		CheckboxItem chkaddVerApp = new CheckboxItem();
 		// ListGridField lgfidApp = new ListGridField("idApp");
 		ListGridField lgfNameApp = new ListGridField("appName");
 		// ListGridField lgfidVersion = new ListGridField("idVersion");
@@ -80,7 +86,7 @@ public class Comss implements EntryPoint {
 		final DynamicForm formApp = new DynamicForm();
 		formApp.setWidth(500);
 		final TextItem txtNameCiclo = new TextItem();
-
+		final SelectItem cbxappsReg = new SelectItem("apps");
 		final SelectItem cbxapps = new SelectItem("apps");
 		final SelectItem cbxVersion = new SelectItem();
 		gsa.selectApp(new AsyncCallback<String>() {
@@ -91,6 +97,8 @@ public class Comss implements EntryPoint {
 				// DataSource dataVersion = dataAppObjVersion.getInstance();
 
 				cbxapps.setOptionDataSource(dataApp);
+				cbxappsReg.setOptionDataSource(dataApp);
+
 				// cbxVersion.setOptionDataSource(dataVersion);
 
 			}
@@ -142,14 +150,13 @@ public class Comss implements EntryPoint {
 		cbxVersion.setPickListFields(lgfVersion);
 		cbxVersion.setPickListWidth(240);
 
-		cbxVersion.setPickListFilterCriteriaFunction(new FormItemCriteriaFunction() {
-			@Override
-			public Criteria getCriteria(FormItemFunctionContext itemContext) {
-				String version = (String) cbxapps.getValue();
-				Criteria criteria = new Criteria("idApp", version);
-				return criteria;
-			}
-		});
+		/*
+		 * cbxVersion.setPickListFilterCriteriaFunction(new FormItemCriteriaFunction() {
+		 * 
+		 * @Override public Criteria getCriteria(FormItemFunctionContext itemContext) {
+		 * String version = (String) cbxapps.getValue(); Criteria criteria = new
+		 * Criteria("idApp", version); return criteria; } });
+		 */
 
 		tTabApp.setPane(formApp);
 
@@ -208,54 +215,112 @@ public class Comss implements EntryPoint {
 		version.setWidth(240);
 		version.setRequired(true);
 
-		Button save = new Button("Save");
-		save.addClickHandler(new ClickHandler() {
+		ButtonItem btnsaveApp = new ButtonItem();
+		btnsaveApp.setName("btnsaveApp");
+		btnsaveApp.setTitle("Registrar");
+
+		btnsaveApp.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				String name = nameApp.getDisplayValue();
-				String vers = version.getDisplayValue();
-				gsa.saveAppVersion(name, vers, new AsyncCallback<String>() {
+				if (formRegisterApp.validate()) {
 
-					@Override
-					public void onSuccess(String result) {
+					boolean aux = true;
+					String name = nameApp.getDisplayValue();
+					String vers = version.getDisplayValue();
+					if (name.equalsIgnoreCase("")) {
+						
+						name = cbxappsReg.getValueField();
+		
+						
 
-						// TODO Auto-generated method stub
-						formRegisterApp.resetValues();
-						gsa.selectAppaVersion(new AsyncCallback<String>() {
-
-							@Override
-							public void onFailure(Throwable caught) {
-								// TODO Auto-generated method stub
-
-							}
-
-							@Override
-							public void onSuccess(String result) {
-								// DataSource dataSAppReg = dataAppReg.getInstance();
-								// listGrid.setDataSource(dataAppReg.getInstance());
-
-								listGrid.refreshData();
-							}
-						});
-
+					} else {
+						
+						aux = false;
 					}
 
-					@Override
-					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
-
-					}
-				});
+					SC.say(name + "-" + aux);
+					/*
+					 * gsa.saveAppVersion(name, vers,aux, new AsyncCallback<String>() {
+					 * 
+					 * @Override public void onSuccess(String result) {
+					 * 
+					 * // TODO Auto-generated method stub formRegisterApp.resetValues();
+					 * gsa.selectAppaVersion(new AsyncCallback<String>() {
+					 * 
+					 * @Override public void onFailure(Throwable caught) { // TODO Auto-generated
+					 * method stub
+					 * 
+					 * }
+					 * 
+					 * @Override public void onSuccess(String result) { // DataSource dataSAppReg =
+					 * dataAppReg.getInstance(); //
+					 * listGrid.setDataSource(dataAppReg.getInstance());
+					 * 
+					 * listGrid.refreshData(); } });
+					 * 
+					 * }
+					 * 
+					 * @Override public void onFailure(Throwable caught) { // TODO Auto-generated
+					 * method stub
+					 * 
+					 * } });
+					 */
+				}
 			}
 		});
 
-		formRegisterApp.setFields(new FormItem[] { nameApp, version });
+		cbxappsReg.setWidth(240);
+		cbxappsReg.setTitle("Apps");
+		cbxappsReg.setValueField("idApp");
+		cbxappsReg.setDisplayField("appName");
+		cbxappsReg.setName("cbxAppName");
+		cbxappsReg.setDisabled(true);
+		
+
+		cbxappsReg.setPickListFields(lgfNameApp);
+		cbxappsReg.setPickListWidth(240);
+
+		cbxappsReg.addChangedHandler(new ChangedHandler() {
+
+			@Override
+			public void onChanged(ChangedEvent event) {
+
+				/*
+				 * gsa.validarVersion("" + event.getValue(), new AsyncCallback<String>() {
+				 * 
+				 * @Override public void onFailure(Throwable caught) { // TODO Auto-generated
+				 * 
+				 * }
+				 * 
+				 * @Override public void onSuccess(String result) {
+				 * 
+				 * formApp.clearValue("cbxVersionName"); DataSource dataVersion =
+				 * dataAppObjVersion.getInstance(); cbxVersion.setOptionDataSource(dataVersion);
+				 * } });
+				 */
+			}
+		});
+
+		chkaddVerApp.setName("addVersion");
+		chkaddVerApp.setTitle("Agregar version a una App");
+		chkaddVerApp.setValue(false);
+		chkaddVerApp.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				cbxappsReg.setDisabled(!((Boolean) event.getValue()));
+				cbxappsReg.setRequired(true);
+				nameApp.setDisabled(((Boolean) event.getValue()));
+				nameApp.setRequired(false);
+			}
+		});
+
+		formRegisterApp.setFields(new FormItem[] { cbxappsReg, nameApp, version, chkaddVerApp, btnsaveApp });
 
 		layoutRegister.addMember(formRegisterApp);
-		layoutRegister.addMember(save);
 
-		listGrid.setWidth100();
-		listGrid.setHeight100();
+		// layoutRegister.addMember(save);
+
+		listGrid.setWidth(500);
+		listGrid.setHeight(500);
 		listGrid.setDataSource(dataAppReg.getInstance());
 		listGrid.setAutoFetchData(true);
 		listGrid.setShowAllRecords(true);
@@ -280,6 +345,26 @@ public class Comss implements EntryPoint {
 						// listGrid.setDataSource(dataAppReg.getInstance());
 
 						listGrid.refreshData();
+					}
+				});
+
+				gsa.selectApp(new AsyncCallback<String>() {
+
+					@Override
+					public void onSuccess(String result) {
+						cbxappsReg.clearValue();
+						DataSource dataApp = dataAppObj.getInstance();
+						// DataSource dataVersion = dataAppObjVersion.getInstance();
+
+						cbxappsReg.setOptionDataSource(dataApp);
+						// cbxVersion.setOptionDataSource(dataVersion);
+
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
 					}
 				});
 

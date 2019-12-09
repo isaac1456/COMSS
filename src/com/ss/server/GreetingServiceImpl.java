@@ -17,6 +17,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import javax.swing.text.StyledEditorKit.BoldAction;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -278,7 +280,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 	}
 
 	@Override
-	public String saveAppVersion(String app, String version) {
+	public String saveAppVersion(String app, String version, boolean aux) {
 		conectar();
 		ResultSet resultSet = null;
 		Statement statement;
