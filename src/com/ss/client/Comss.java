@@ -1,32 +1,20 @@
 package com.ss.client;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.gargoylesoftware.htmlunit.javascript.host.Window;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DataSource;
-import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.types.DSDataFormat;
 import com.smartgwt.client.types.Side;
 import com.smartgwt.client.types.TitleOrientation;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.Label;
-
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.ButtonItem;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
-import com.smartgwt.client.widgets.form.fields.FormItemCriteriaFunction;
-import com.smartgwt.client.widgets.form.fields.FormItemFunctionContext;
 import com.smartgwt.client.widgets.form.fields.IPickTreeItem;
 import com.smartgwt.client.widgets.form.fields.MultiComboBoxItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
@@ -37,10 +25,9 @@ import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.form.fields.events.ClickEvent;
 import com.smartgwt.client.widgets.form.fields.events.ClickHandler;
+import com.smartgwt.client.widgets.form.validator.IntegerRangeValidator;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
-import com.smartgwt.client.widgets.grid.events.RecordClickEvent;
-import com.smartgwt.client.widgets.grid.events.RecordClickHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
@@ -48,7 +35,6 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedEvent;
 import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 import com.smartgwt.client.widgets.tree.Tree;
 import com.ss.shared.DataSources;
-import com.ss.shared.Functions;
 import com.ss.shared.dataAppObj;
 import com.ss.shared.dataAppObjVersion;
 import com.ss.shared.dataAppReg;
@@ -65,7 +51,7 @@ public class Comss implements EntryPoint {
 		final TabSet tabSet = new TabSet();
 		tabSet.setTabBarPosition(Side.TOP);
 		tabSet.setWidth("90%");
-		tabSet.setHeight("80%");
+		tabSet.setHeight100();
 		final VLayout layoutApp = new VLayout(10);
 		layoutApp.setWidth("100%");
 
@@ -115,6 +101,7 @@ public class Comss implements EntryPoint {
 		cbxapps.setValueField("idApp");
 		cbxapps.setDisplayField("appName");
 		cbxapps.setName("cbxAppName");
+		cbxapps.setRequired(true);
 
 		cbxapps.setPickListFields(lgfNameApp);
 		cbxapps.setPickListWidth(240);
@@ -149,6 +136,14 @@ public class Comss implements EntryPoint {
 		cbxVersion.setDisplayField("versionName");
 		cbxVersion.setPickListFields(lgfVersion);
 		cbxVersion.setPickListWidth(240);
+		cbxVersion.addChangedHandler(new ChangedHandler() {
+
+			@Override
+			public void onChanged(ChangedEvent event) {
+				txtNameCiclo.setDisabled(false);
+
+			}
+		});
 
 		/*
 		 * cbxVersion.setPickListFilterCriteriaFunction(new FormItemCriteriaFunction() {
@@ -184,8 +179,6 @@ public class Comss implements EntryPoint {
 		label.setAlign(Alignment.CENTER);
 		label.setValign(VerticalAlignment.CENTER);
 		label.setWrap(false);
-
-		formApp.setFields(new FormItem[] { cbxapps, cbxVersion, txtNameCiclo, mcbxmetrics });
 
 		final DynamicForm formResult = new DynamicForm();
 		formResult.setWidth(500);
@@ -408,6 +401,8 @@ public class Comss implements EntryPoint {
 			}
 		});
 		layoutRegister.addMember(listGrid);
+//"", "", "Requerimientos Funcionales",
+		// "Eficacia de la Eliminación de Defectos" }
 
 		tTabRegisteer.setPane(layoutRegister);
 
@@ -416,65 +411,97 @@ public class Comss implements EntryPoint {
 		formmetricsField.setGroupTitle("Metricas");
 		formmetricsField.setWidth100();
 		formmetricsField.setPadding(3);
-		formmetricsField.setTitleOrientation(TitleOrientation.TOP);
+		formmetricsField.setTitleOrientation(TitleOrientation.LEFT);
+
+		IntegerRangeValidator integerRangeValidator = new IntegerRangeValidator();
+		integerRangeValidator.setMin(0);
+		integerRangeValidator.setMax(100);
 
 		final TextItem casesSuccess = new TextItem();
 		casesSuccess.setTitle("Casos Exitosos");
 		casesSuccess.setWidth(240);
 		casesSuccess.hide();
+		casesSuccess.setKeyPressFilter("[0-9.]");
+		casesSuccess.setValidators(integerRangeValidator);
 
 		final TextItem casesFailed = new TextItem();
 		casesFailed.setTitle("Casos Fallidos");
 		casesFailed.setWidth(240);
 		casesFailed.hide();
+		casesFailed.setKeyPressFilter("[0-9.]");
+		casesFailed.setValidators(integerRangeValidator);
 
 		final TextItem porEfect = new TextItem();
 		porEfect.setTitle("% Efectividad");
 		porEfect.setWidth(240);
 		porEfect.hide();
+		porEfect.setCanEdit(false);
 
 		final TextItem bugFound = new TextItem();
 		bugFound.setTitle("Bugs Encontrados");
 		bugFound.setWidth(240);
+		bugFound.hide();
+		bugFound.setKeyPressFilter("[0-9.]");
+		bugFound.setValidators(integerRangeValidator);
 
 		final TextItem bugFixed = new TextItem();
 		bugFixed.setTitle("Bugs Corregidos");
 		bugFixed.setWidth(240);
+		bugFixed.hide();
+		bugFixed.setKeyPressFilter("[0-9.]");
+		bugFixed.setValidators(integerRangeValidator);
 
 		final TextItem porBugFixed = new TextItem();
 		porBugFixed.setTitle("% Bug Corregidos");
 		porBugFixed.setWidth(240);
+		porBugFixed.hide();
+		porBugFixed.setCanEdit(false);
 
 		final TextItem reqComplete = new TextItem();
 		reqComplete.setTitle("Requerimientos Completados");
 		reqComplete.setWidth(240);
+		reqComplete.hide();
+		reqComplete.setKeyPressFilter("[0-9.]");
+		reqComplete.setValidators(integerRangeValidator);
 
 		final TextItem reqInComplete = new TextItem();
 		reqInComplete.setTitle(" Requerimientos faltantes  ");
 		reqInComplete.setWidth(240);
+		reqInComplete.hide();
+		reqInComplete.setKeyPressFilter("[0-9.]");
+		reqComplete.setValidators(integerRangeValidator);
 
 		final TextItem porComplete = new TextItem();
 		porComplete.setTitle("% Requerimientos Funcionales");
 		porComplete.setWidth(240);
+		porComplete.hide();
+		porComplete.setCanEdit(false);
 
 		final TextItem errorFoundBef = new TextItem();
 		errorFoundBef.setTitle("Errores encontrados antes");
 		errorFoundBef.setWidth(240);
+		errorFoundBef.hide();
+		errorFoundBef.setKeyPressFilter("[0-9.]");
+		errorFoundBef.setValidators(integerRangeValidator);
 
 		final TextItem errorFoundAft = new TextItem();
 		errorFoundAft.setTitle("Errores encontrados depues");
 		errorFoundAft.setWidth(240);
+		errorFoundAft.hide();
+		errorFoundAft.setKeyPressFilter("[0-9.]");
+		errorFoundAft.setValidators(integerRangeValidator);
 
 		final TextItem EED = new TextItem();
 		EED.setTitle("Eficacia de la Eliminacion de Defectos ");
 		EED.setWidth(240);
-		
+		EED.hide();
+
 		mcbxmetrics.addChangedHandler(new ChangedHandler() {
-			
+
 			@Override
 			public void onChanged(ChangedEvent event) {
-				SC.say(""+mcbxmetrics.getSelectedRecord());
-				
+				SC.say("" + mcbxmetrics.getSelectedRecord());
+
 			}
 		});
 
@@ -487,8 +514,144 @@ public class Comss implements EntryPoint {
 		 * 
 		 * formmetricsField.setFields(formItem);
 		 */
-		formmetricsField.setFields(new FormItem[] { casesSuccess, casesFailed, porEfect, bugFound, bugFixed,
-				porBugFixed, reqComplete, reqInComplete, porComplete, errorFoundBef, errorFoundAft, EED });
+		final CheckboxItem chkEfec = new CheckboxItem();
+		chkEfec.setName("chkEfectividad");
+		chkEfec.setTitle("Efectividad");
+		chkEfec.setValue(false);
+		chkEfec.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				if ((Boolean) event.getValue()) {
+					casesSuccess.show();
+					casesFailed.show();
+					porEfect.show();
+				} else {
+					casesSuccess.hide();
+					casesFailed.hide();
+					porEfect.hide();
+				}
+
+			}
+		});
+
+		final CheckboxItem chkBug = new CheckboxItem();
+		chkBug.setName("chkBug");
+		chkBug.setTitle("% Bug faltantes");
+		chkBug.setValue(false);
+		chkBug.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				if ((Boolean) event.getValue()) {
+					bugFound.show();
+					bugFixed.show();
+					porBugFixed.show();
+				} else {
+					bugFound.hide();
+					bugFixed.hide();
+					porBugFixed.hide();
+				}
+
+			}
+		});
+
+		final CheckboxItem chkReqFun = new CheckboxItem();
+		chkReqFun.setName("chkReqFun");
+		chkReqFun.setTitle("Requerimientos Funcionales");
+		chkReqFun.setValue(false);
+		chkReqFun.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				if ((Boolean) event.getValue()) {
+					reqComplete.show();
+					reqInComplete.show();
+					porComplete.show();
+				} else {
+					reqComplete.hide();
+					reqInComplete.hide();
+					porComplete.hide();
+				}
+
+			}
+		});
+
+		final CheckboxItem chkEDD = new CheckboxItem();
+		chkEDD.setName("chkEDD");
+		chkEDD.setTitle("Eficacia de la Eliminacion de Defectos");
+		chkEDD.setValue(false);
+		chkEDD.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				if ((Boolean) event.getValue()) {
+					errorFoundAft.show();
+					errorFoundBef.show();
+					EED.show();
+				} else {
+					errorFoundAft.hide();
+					errorFoundBef.hide();
+					EED.hide();
+				}
+
+			}
+		});
+
+		final CheckboxItem chkFE = new CheckboxItem();
+		chkEDD.setName("chkEDD");
+		chkEDD.setTitle("Frecuencia de errores");
+		chkEDD.setValue(false);
+		chkEDD.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				if ((Boolean) event.getValue()) {
+					errorFoundAft.show();
+					errorFoundBef.show();
+					EED.show();
+				} else {
+					errorFoundAft.hide();
+					errorFoundBef.hide();
+					EED.hide();
+				}
+
+			}
+		});
+		final ButtonItem btnSaveData = new ButtonItem();
+		formApp.setFields(
+				new FormItem[] { cbxapps, cbxVersion, txtNameCiclo, chkEfec, chkBug, chkReqFun, chkEDD, btnSaveData });
+
+		final FormItem[] fiMetrics = new FormItem[] { casesSuccess, casesFailed, porEfect, bugFound, bugFixed,
+				porBugFixed, reqComplete, reqInComplete, porComplete, errorFoundBef, errorFoundAft, EED };
+
+		btnSaveData.setName("btnSaveData");
+		btnSaveData.setTitle("Registrar Ciclo");
+		btnSaveData.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				formApp.validate();
+				// SC.say("Entro en if"+fiMetrics.length);
+
+				SC.logInfo("Entro " + fiMetrics.length);
+				String aux = "";
+				for (int i = 0; i < fiMetrics.length; i++) {
+					TextItem formItem = (TextItem) fiMetrics[i];
+
+					if (formItem.isVisible()) {
+						formItem.setValue("1.0"); //
+						formItem.setValueField("1.0");
+
+						formItem.setDisplayField("1.0");
+
+						aux = aux + " -" + formItem.getTitle();
+
+					}
+					SC.say(aux);
+
+					// SC.say("Entro en if"+formItem.getTitle());
+
+				}
+
+			}
+		});
+
+		/*
+		 * formmetricsField.setFields(new FormItem[] { casesSuccess, casesFailed,
+		 * porEfect, bugFound, bugFixed, porBugFixed, reqComplete, reqInComplete,
+		 * porComplete, errorFoundBef, errorFoundAft, EED });
+		 */ formmetricsField.setFields(fiMetrics);
 
 		layoutApp.setMembers(formApp, formmetricsField);
 
