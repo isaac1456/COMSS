@@ -421,14 +421,17 @@ public class Comss implements EntryPoint {
 		final TextItem casesSuccess = new TextItem();
 		casesSuccess.setTitle("Casos Exitosos");
 		casesSuccess.setWidth(240);
+		casesSuccess.hide();
 
 		final TextItem casesFailed = new TextItem();
 		casesFailed.setTitle("Casos Fallidos");
 		casesFailed.setWidth(240);
+		casesFailed.hide();
 
 		final TextItem porEfect = new TextItem();
 		porEfect.setTitle("% Efectividad");
 		porEfect.setWidth(240);
+		porEfect.hide();
 
 		final TextItem bugFound = new TextItem();
 		bugFound.setTitle("Bugs Encontrados");
@@ -465,6 +468,15 @@ public class Comss implements EntryPoint {
 		final TextItem EED = new TextItem();
 		EED.setTitle("Eficacia de la Eliminacion de Defectos ");
 		EED.setWidth(240);
+		
+		mcbxmetrics.addChangedHandler(new ChangedHandler() {
+			
+			@Override
+			public void onChanged(ChangedEvent event) {
+				SC.say(""+mcbxmetrics.getSelectedRecord());
+				
+			}
+		});
 
 		/*
 		 * FormItem[] formItem = new FormItem[] { casesSuccess,casesFailed, porEfect,
