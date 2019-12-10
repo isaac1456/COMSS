@@ -92,14 +92,13 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 				JSONObject appdetails = new JSONObject();
 				appdetails.put("idApp", resultSet.getInt(1));
 				appdetails.put("appName", resultSet.getString(2));
-				
 
 				appList.add(appdetails);
 
 				System.out.println(resultSet.getString(1) + " " + resultSet.getString(2));
 			}
 			wirteJson(appList, "apps");
-			connection.close();
+			//connection.close();
 
 		} catch (SQLException e) {
 
@@ -141,7 +140,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 				System.out.println(resultSet.getString(1) + " " + resultSet.getString(2));
 			}
 			wirteJson(appList, "apps");
-			connection.close();
+			//connection.close();
 
 		} catch (SQLException e) {
 
@@ -152,7 +151,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 		return localDir + "\\Resources\\apps.json";
 
 	}
-	
+
 	public String validarVersion(String id) {
 		conectar();
 		ResultSet resultSet = null;
@@ -162,15 +161,14 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 		JSONArray appList = new JSONArray();
 		try {
 
-			String selectSql = "select * from version where app_fk =" + id
-					+ ";";
+			String selectSql = "select * from version where app_fk =" + id + ";";
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery(selectSql);
 
 			while (resultSet.next()) {
 
 				JSONObject appdetails = new JSONObject();
-				
+
 				appdetails.put("idVersion", resultSet.getInt(1));
 				appdetails.put("versionName", resultSet.getString(2));
 
@@ -178,7 +176,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 
 			}
 			wirteJson(appList, "version");
-			connection.close();
+			//connection.close();
 
 		} catch (SQLException e) {
 
@@ -225,7 +223,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 	private void wirteJson(JSONArray array, String name) {
 		String localDir = System.getProperty("user.dir");
 
-		try (FileWriter file = new FileWriter(localDir + "\\Resources\\"+name+".json")) {
+		try (FileWriter file = new FileWriter(localDir + "\\Resources\\" + name + ".json")) {
 
 			file.write(array.toJSONString());
 			file.flush();
@@ -286,36 +284,45 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 		Statement statement;
 		String result = "no";
 		System.out.println("----------------------------");
-	//	JSONArray appList = new JSONArray();
+		// JSONArray appList = new JSONArray();
 		try {
-			int auxMax =0;
 
-			
-			String selectTop ="SELECT TOP 1 * FROM apps ORDER BY idApp DESC";
+			int auxMax = 0;
+
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery(selectTop);
 
-			if	 (resultSet.next()) {
-				auxMax = resultSet.getInt(1)+1;
+			if (aux) {
+				String insertverAppsql = "insert into version (versionName, app_fk) values('" + version + "'," + app
+						+ " );";
+				statement.executeUpdate(insertverAppsql);
+				result = "Se agrego la Version";
+
+			} else {
+				String selectTop = "SELECT TOP 1 * FROM apps ORDER BY idApp DESC";
+
+				resultSet = statement.executeQuery(selectTop);
+				if (resultSet.next()) {
+					auxMax = resultSet.getInt(1) + 1;
+				}
+				String insertAppSql = "insert into apps (appName) values('" + app + "');";
+				String insertverSql = "insert into version (versionName, app_fk) values('" + version + "'," + auxMax
+						+ " );";
+				statement.executeUpdate(insertAppSql);
+				statement.executeUpdate(insertverSql);
+				result = "Se agrego la App";
 			}
-			String insertAppSql = "insert into apps (appName) values('"+app+"');";
-			String insertverSql = "insert into version (versionName, app_fk) values('"+version+"',"+auxMax+" );";
-			statement.executeUpdate(insertAppSql);
-			statement.executeUpdate(insertverSql); 
-			//wirteJson(appList, "version");
-			connection.close();
+
+			// wirteJson(appList, "version");
+			// connection.close();
 
 		} catch (SQLException e) {
 
 			e.printStackTrace();
+			result = "No se Registro, Verifique la informacion";
 		}
 
-		return "si";
+		return result;
 
-		
-		
 	}
 
-
-	
 }

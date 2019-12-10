@@ -15,6 +15,7 @@ import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.DSDataFormat;
 import com.smartgwt.client.types.Side;
+import com.smartgwt.client.types.TitleOrientation;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Button;
@@ -61,13 +62,12 @@ public class Comss implements EntryPoint {
 
 		final GreetingServiceAsync gsa = GWT.create(GreetingService.class);
 
-		// LinkedHashMap<String, String> hashMap = new LinkedHashMap<String, String>();
-		// hashMap.put("wrq", "weqrwe");
-		// Map<String, String[]> map = new HashMap<String, String[]>();
 		final TabSet tabSet = new TabSet();
 		tabSet.setTabBarPosition(Side.TOP);
 		tabSet.setWidth("90%");
 		tabSet.setHeight("80%");
+		final VLayout layoutApp = new VLayout(10);
+		layoutApp.setWidth("100%");
 
 		tabSet.setStyleName("containertabs");
 		Tab tTabApp = new Tab("Aplicaciones", "");
@@ -158,13 +158,13 @@ public class Comss implements EntryPoint {
 		 * Criteria("idApp", version); return criteria; } });
 		 */
 
-		tTabApp.setPane(formApp);
+		tTabApp.setPane(layoutApp);
 
 		txtNameCiclo.setTitle("Nombre del ciclo");
 		txtNameCiclo.setWidth(240);
 		txtNameCiclo.setRequired(true);
-		txtNameCiclo.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
-		txtNameCiclo.setShowIcons(true);
+		// txtNameCiclo.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
+		// txtNameCiclo.setShowIcons(true);
 		txtNameCiclo.setDisabled(true);
 
 		final MultiComboBoxItem mcbxmetrics = new MultiComboBoxItem();
@@ -174,7 +174,9 @@ public class Comss implements EntryPoint {
 		mcbxmetrics.setShowPending(true);
 
 		// mcbxmetrics.setIcons(Functions.iconTextHelp(DataSources.HELPTEXT));
-		mcbxmetrics.setShowIcons(true);
+		// mcbxmetrics.setShowIcons(true);
+		mcbxmetrics.setValueMap(new String[] { "Efectividad", "% Bug faltantes", "Requerimientos Funcionales",
+				"Eficacia de la Eliminación de Defectos" });
 
 		final Label label = new Label();
 		label.setHeight(30);
@@ -225,57 +227,62 @@ public class Comss implements EntryPoint {
 				if (formRegisterApp.validate()) {
 
 					boolean aux = true;
-					String name = nameApp.getDisplayValue();
+					String name = "";
+					String name2 = "";
 					String vers = version.getDisplayValue();
-					if (name.equalsIgnoreCase("")) {
-						
-						name = cbxappsReg.getValueField();
-		
-						
+					if (nameApp.isDisabled()) {
+
+						name = cbxappsReg.getDisplayValue();
 
 					} else {
-						
+						name = nameApp.getDisplayValue();
 						aux = false;
 					}
 
-					SC.say(name + "-" + aux);
-					/*
-					 * gsa.saveAppVersion(name, vers,aux, new AsyncCallback<String>() {
-					 * 
-					 * @Override public void onSuccess(String result) {
-					 * 
-					 * // TODO Auto-generated method stub formRegisterApp.resetValues();
-					 * gsa.selectAppaVersion(new AsyncCallback<String>() {
-					 * 
-					 * @Override public void onFailure(Throwable caught) { // TODO Auto-generated
-					 * method stub
-					 * 
-					 * }
-					 * 
-					 * @Override public void onSuccess(String result) { // DataSource dataSAppReg =
-					 * dataAppReg.getInstance(); //
-					 * listGrid.setDataSource(dataAppReg.getInstance());
-					 * 
-					 * listGrid.refreshData(); } });
-					 * 
-					 * }
-					 * 
-					 * @Override public void onFailure(Throwable caught) { // TODO Auto-generated
-					 * method stub
-					 * 
-					 * } });
-					 */
+					// SC.say(name + "-" + aux);
+
+					gsa.saveAppVersion(name, vers, aux, new AsyncCallback<String>() {
+
+						@Override
+						public void onSuccess(String result) {
+
+							// TODO Auto-generated method stub formRegisterApp.resetValues();
+							SC.say(result);
+							gsa.selectAppaVersion(new AsyncCallback<String>() {
+
+								@Override
+								public void onFailure(Throwable caught) { // TODO Auto-generated
+
+								}
+
+								@Override
+								public void onSuccess(String result) { // DataSource dataSAppReg =
+									// dataAppReg.getInstance(); //
+									// listGrid.setDataSource(dataAppReg.getInstance());
+
+									listGrid.refreshData();
+									formRegisterApp.reset();
+								}
+							});
+
+						}
+
+						@Override
+						public void onFailure(Throwable caught) { // TODO Auto-generated
+							SC.warn(caught + "");
+						}
+					});
+
 				}
 			}
 		});
 
 		cbxappsReg.setWidth(240);
 		cbxappsReg.setTitle("Apps");
-		cbxappsReg.setValueField("idApp");
-		cbxappsReg.setDisplayField("appName");
+		cbxappsReg.setValueField("appName");
+		cbxappsReg.setDisplayField("idApp");
 		cbxappsReg.setName("cbxAppName");
 		cbxappsReg.setDisabled(true);
-		
 
 		cbxappsReg.setPickListFields(lgfNameApp);
 		cbxappsReg.setPickListWidth(240);
@@ -320,7 +327,7 @@ public class Comss implements EntryPoint {
 		// layoutRegister.addMember(save);
 
 		listGrid.setWidth(500);
-		listGrid.setHeight(500);
+		listGrid.setHeight100();
 		listGrid.setDataSource(dataAppReg.getInstance());
 		listGrid.setAutoFetchData(true);
 		listGrid.setShowAllRecords(true);
@@ -341,10 +348,12 @@ public class Comss implements EntryPoint {
 
 					@Override
 					public void onSuccess(String result) {
+
 						// DataSource dataSAppReg = dataAppReg.getInstance();
 						// listGrid.setDataSource(dataAppReg.getInstance());
 
 						listGrid.refreshData();
+						;
 					}
 				});
 
@@ -357,13 +366,14 @@ public class Comss implements EntryPoint {
 						// DataSource dataVersion = dataAppObjVersion.getInstance();
 
 						cbxappsReg.setOptionDataSource(dataApp);
+
 						// cbxVersion.setOptionDataSource(dataVersion);
 
 					}
 
 					@Override
 					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
+						SC.warn("Hubo un erro con la Base de Datos");
 
 					}
 				});
@@ -400,6 +410,75 @@ public class Comss implements EntryPoint {
 		layoutRegister.addMember(listGrid);
 
 		tTabRegisteer.setPane(layoutRegister);
+
+		final DynamicForm formmetricsField = new DynamicForm();
+		formmetricsField.setIsGroup(true);
+		formmetricsField.setGroupTitle("Metricas");
+		formmetricsField.setWidth100();
+		formmetricsField.setPadding(3);
+		formmetricsField.setTitleOrientation(TitleOrientation.TOP);
+
+		final TextItem casesSuccess = new TextItem();
+		casesSuccess.setTitle("Casos Exitosos");
+		casesSuccess.setWidth(240);
+
+		final TextItem casesFailed = new TextItem();
+		casesFailed.setTitle("Casos Fallidos");
+		casesFailed.setWidth(240);
+
+		final TextItem porEfect = new TextItem();
+		porEfect.setTitle("% Efectividad");
+		porEfect.setWidth(240);
+
+		final TextItem bugFound = new TextItem();
+		bugFound.setTitle("Bugs Encontrados");
+		bugFound.setWidth(240);
+
+		final TextItem bugFixed = new TextItem();
+		bugFixed.setTitle("Bugs Corregidos");
+		bugFixed.setWidth(240);
+
+		final TextItem porBugFixed = new TextItem();
+		porBugFixed.setTitle("% Bug Corregidos");
+		porBugFixed.setWidth(240);
+
+		final TextItem reqComplete = new TextItem();
+		reqComplete.setTitle("Requerimientos Completados");
+		reqComplete.setWidth(240);
+
+		final TextItem reqInComplete = new TextItem();
+		reqInComplete.setTitle(" Requerimientos faltantes  ");
+		reqInComplete.setWidth(240);
+
+		final TextItem porComplete = new TextItem();
+		porComplete.setTitle("% Requerimientos Funcionales");
+		porComplete.setWidth(240);
+
+		final TextItem errorFoundBef = new TextItem();
+		errorFoundBef.setTitle("Errores encontrados antes");
+		errorFoundBef.setWidth(240);
+
+		final TextItem errorFoundAft = new TextItem();
+		errorFoundAft.setTitle("Errores encontrados depues");
+		errorFoundAft.setWidth(240);
+
+		final TextItem EED = new TextItem();
+		EED.setTitle("Eficacia de la Eliminacion de Defectos ");
+		EED.setWidth(240);
+
+		/*
+		 * FormItem[] formItem = new FormItem[] { casesSuccess,casesFailed, porEfect,
+		 * bugFound,bugFixed,porBugFixed, reqComplete,reqInComplete,
+		 * porComplete,errorFoundBef, errorFoundAft, EED
+		 * 
+		 * };
+		 * 
+		 * formmetricsField.setFields(formItem);
+		 */
+		formmetricsField.setFields(new FormItem[] { casesSuccess, casesFailed, porEfect, bugFound, bugFixed,
+				porBugFixed, reqComplete, reqInComplete, porComplete, errorFoundBef, errorFoundAft, EED });
+
+		layoutApp.setMembers(formApp, formmetricsField);
 
 		RootPanel.get("containerMain").add(tabSet);
 
