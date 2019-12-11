@@ -10,9 +10,10 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface GreetingService extends RemoteService {
 	String greetServer(String name) throws IllegalArgumentException;
 	String selectApp() ; 
-	String insertMetrics(); 
+	String insertMetrics(String nameMetrics, float valueMetric); 
 	String validarVersion(String id);
 	String selectAppaVersion();
 	String saveAppVersion(String app, String version, boolean aux);
+	String insertCiclos(String name, int idVersionfk);
 	
 }

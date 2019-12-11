@@ -6,7 +6,7 @@ import com.smartgwt.client.widgets.form.fields.events.FormItemClickHandler;
 import com.smartgwt.client.widgets.form.fields.events.FormItemIconClickEvent;
 import com.smartgwt.client.widgets.tree.TreeNode;
 
-public class Functions {
+public class Funciones {
 
 	public static FormItemIcon iconTextHelp(String heltext) {
 		final String aux = heltext; 
@@ -35,19 +35,19 @@ public class Functions {
 	        }  
 	    }  
 	 
-	 public float calEfectividad(float A, float B) {
+	 public static float calEfectividad(float A, float B) {
 		return (A*100)/B;
 	}
 	 
-	 public float calFuncion(float A, float B) {
+	 public static float calFuncion(float A, float B) {
 			return (1 - A)/B;
 		}
 
-	 public float calBugs(float A, float B) {
+	 public static float calBugs(float A, float B) {
 			return A/B;
 		}
 	 
-	 public float EED(float A, float B) {
+	 public static float EED(float A, float B) {
 			return A/(A+B);
 		}
 }

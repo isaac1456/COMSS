@@ -35,6 +35,7 @@ import com.smartgwt.client.widgets.tab.events.TabSelectedEvent;
 import com.smartgwt.client.widgets.tab.events.TabSelectedHandler;
 import com.smartgwt.client.widgets.tree.Tree;
 import com.ss.shared.DataSources;
+import com.ss.shared.Funciones;
 import com.ss.shared.dataAppObj;
 import com.ss.shared.dataAppObjVersion;
 import com.ss.shared.dataAppReg;
@@ -66,7 +67,7 @@ public class Comss implements EntryPoint {
 		CheckboxItem chkaddVerApp = new CheckboxItem();
 		// ListGridField lgfidApp = new ListGridField("idApp");
 		ListGridField lgfNameApp = new ListGridField("appName");
-		// ListGridField lgfidVersion = new ListGridField("idVersion");
+		ListGridField lgfidVersion = new ListGridField("idVersion");
 		ListGridField lgfVersion = new ListGridField("versionName");
 
 		final DynamicForm formApp = new DynamicForm();
@@ -132,9 +133,9 @@ public class Comss implements EntryPoint {
 		cbxVersion.setWidth(240);
 		cbxVersion.setName("cbxVersionName");
 		cbxVersion.setTitle("Version");
-		cbxVersion.setValueField("versionName");
+		cbxVersion.setValueField("idVersion");
 		cbxVersion.setDisplayField("versionName");
-		cbxVersion.setPickListFields(lgfVersion);
+		cbxVersion.setPickListFields(lgfidVersion, lgfVersion);
 		cbxVersion.setPickListWidth(240);
 		cbxVersion.addChangedHandler(new ChangedHandler() {
 
@@ -416,6 +417,12 @@ public class Comss implements EntryPoint {
 		IntegerRangeValidator integerRangeValidator = new IntegerRangeValidator();
 		integerRangeValidator.setMin(0);
 		integerRangeValidator.setMax(100);
+		
+		final TextItem casesExecute = new TextItem();
+		casesExecute.setTitle("Casos Ejecutados");
+		casesExecute.setWidth(240);
+		casesExecute.setCanEdit(false);
+		casesExecute.setRequired(true);
 
 		final TextItem casesSuccess = new TextItem();
 		casesSuccess.setTitle("Casos Exitosos");
@@ -431,11 +438,7 @@ public class Comss implements EntryPoint {
 		casesFailed.setKeyPressFilter("[0-9.]");
 		casesFailed.setValidators(integerRangeValidator);
 
-		final TextItem porEfect = new TextItem();
-		porEfect.setTitle("% Efectividad");
-		porEfect.setWidth(240);
-		porEfect.hide();
-		porEfect.setCanEdit(false);
+		
 
 		final TextItem bugFound = new TextItem();
 		bugFound.setTitle("Bugs Encontrados");
@@ -443,6 +446,14 @@ public class Comss implements EntryPoint {
 		bugFound.hide();
 		bugFound.setKeyPressFilter("[0-9.]");
 		bugFound.setValidators(integerRangeValidator);
+		bugFound.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				// TODO Auto-generated method stub
+
+			}
+		});
 
 		final TextItem bugFixed = new TextItem();
 		bugFixed.setTitle("Bugs Corregidos");
@@ -523,11 +534,11 @@ public class Comss implements EntryPoint {
 				if ((Boolean) event.getValue()) {
 					casesSuccess.show();
 					casesFailed.show();
-					porEfect.show();
+					
 				} else {
 					casesSuccess.hide();
 					casesFailed.hide();
-					porEfect.hide();
+				
 				}
 
 			}
@@ -535,7 +546,7 @@ public class Comss implements EntryPoint {
 
 		final CheckboxItem chkBug = new CheckboxItem();
 		chkBug.setName("chkBug");
-		chkBug.setTitle("% Bug faltantes");
+		chkBug.setTitle("Bug");
 		chkBug.setValue(false);
 		chkBug.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
@@ -612,8 +623,8 @@ public class Comss implements EntryPoint {
 		formApp.setFields(
 				new FormItem[] { cbxapps, cbxVersion, txtNameCiclo, chkEfec, chkBug, chkReqFun, chkEDD, btnSaveData });
 
-		final FormItem[] fiMetrics = new FormItem[] { casesSuccess, casesFailed, porEfect, bugFound, bugFixed,
-				porBugFixed, reqComplete, reqInComplete, porComplete, errorFoundBef, errorFoundAft, EED };
+		final FormItem[] fiMetrics = new FormItem[] {casesExecute, casesSuccess, casesFailed, bugFixed, bugFound, reqComplete,
+				reqInComplete, errorFoundBef, errorFoundAft };
 
 		btnSaveData.setName("btnSaveData");
 		btnSaveData.setTitle("Registrar Ciclo");
@@ -622,27 +633,113 @@ public class Comss implements EntryPoint {
 			@Override
 			public void onClick(ClickEvent event) {
 				formApp.validate();
-				// SC.say("Entro en if"+fiMetrics.length);
+				formmetricsField.validate();
 
-				SC.logInfo("Entro " + fiMetrics.length);
-				String aux = "";
-				for (int i = 0; i < fiMetrics.length; i++) {
-					TextItem formItem = (TextItem) fiMetrics[i];
+				String nameCiclo = txtNameCiclo.getDisplayValue();
+				int idVers = Integer.parseInt(cbxVersion.getValues()[0]);
 
-					if (formItem.isVisible()) {
-						formItem.setValue("1.0"); //
-						formItem.setValueField("1.0");
+				// SC.say(idVersion+" - "+nameCiclo);
+				gsa.insertCiclos(nameCiclo, idVers, new AsyncCallback<String>() {
+					
+					@Override
+					public void onSuccess(String result) {
+						String aux = "";
+						String nameMetric = "";
+						for (int i = 0; i < fiMetrics.length; i++) {
+							TextItem formItem = (TextItem) fiMetrics[i];
 
-						formItem.setDisplayField("1.0");
+							if (formItem.isVisible()) {
+								if (formItem.getDisplayValue().equalsIgnoreCase("")) {
+									formItem.setErrors("Is Requerid");
 
-						aux = aux + " -" + formItem.getTitle();
+								} else {
+									aux = aux + " -" + formItem.getTitle() + " - "+formItem.getDisplayValue();
+									gsa.insertMetrics(formItem.getTitle(), Float.parseFloat(formItem.getDisplayValue()), new AsyncCallback<String>() {
+										
+										@Override
+										public void onSuccess(String result) {
+											// TODO Auto-generated method stub
+											
+										}
+										
+										@Override
+										public void onFailure(Throwable caught) {
+											// TODO Auto-generated method stub
+											
+										}
+									});
+								}
 
+							}
+							//SC.say(aux);
+
+						}
+						if (chkEfec.getValue().equals(true)) {
+
+							SC.say(aux);
+						}
+						if (chkReqFun.getValue().equals(true)) {
+
+							SC.say(aux);
+						}
+						if (chkBug.getValue().equals(true)) {
+							nameMetric = "Levantamiento de defectos ";
+							float A = Float.parseFloat(bugFixed.getDisplayValue());
+							float B = Float.parseFloat(bugFound.getDisplayValue());
+							float por = Funciones.calBugs(A, B);
+							gsa.insertMetrics(nameMetric, por, new AsyncCallback<String>() {
+								
+								@Override
+								public void onSuccess(String result) {
+									
+									
+								}
+								
+								@Override
+								public void onFailure(Throwable caught) {
+									// TODO Auto-generated method stub
+									
+								}
+							});
+						//	SC.say("" + por);
+							SC.say(aux);
+							// 
+						}
+						if (chkEDD.getValue().equals(true)) {
+							nameMetric = "Eficacia de la Eliminacion de Defectos";
+							float E = Float.parseFloat(errorFoundBef.getDisplayValue());
+							float D = Float.parseFloat(errorFoundAft.getDisplayValue());
+							float por = Funciones.EED(E, D); 
+							gsa.insertMetrics(nameMetric, por, new AsyncCallback<String>() {
+								
+								@Override
+								public void onSuccess(String result) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void onFailure(Throwable caught) {
+									// TODO Auto-generated method stub
+									
+								}
+							});
+							
+							
+
+							//SC.say(aux);
+						}
+						
 					}
-					SC.say(aux);
-
-					// SC.say("Entro en if"+formItem.getTitle());
-
-				}
+					
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
+				
 
 			}
 		});

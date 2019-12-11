@@ -109,46 +109,45 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 
 	}
 
-	public String insertMetrics() {
+	public String insertMetrics(String nameMetrics, float valueMetric) {
 		conectar();
 		ResultSet resultSet = null;
-		// arrayList = new LinkedHashMap<String, String>();
-		String localDir = System.getProperty("user.dir");
-		JSONArray appList = new JSONArray();
-
-		System.out.println("*********************************entro*************************************************");
 		Statement statement;
+		String result = "no";
+		System.out.println("----------------------------");
+		// JSONArray appList = new JSONArray();
 		try {
 
-			String selectSql = "select apps.idApp, apps.appName, version.idVersion,version.versionName from apps, version where apps.idApp = version.app_fk; ";
+			int auxMax = 0;
+
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery(selectSql);
-			// hashMap.put("app name", "Version ");
-			System.out.println(
-					"*********************************before while*************************************************");
-			while (resultSet.next()) {
-				System.out.println("*********************************: " + resultSet.getString(2));
 
-				JSONObject appdetails = new JSONObject();
-				appdetails.put("idApp", resultSet.getInt(1));
-				appdetails.put("appName", resultSet.getString(2));
-				appdetails.put("idVersion", resultSet.getInt(3));
-				appdetails.put("versionName", resultSet.getString(4));
+		
+			
+			
+				String selectTop = "SELECT TOP 1 * FROM ciclos ORDER BY idCiclos DESC;";
 
-				appList.add(appdetails);
+				resultSet = statement.executeQuery(selectTop);
+				if (resultSet.next()) {
+					auxMax = resultSet.getInt(1);
+				}
+				String insertSql = "insert into metrics (metricName, metricValue, ciclos_fk) values('" + nameMetrics + "', "+valueMetric+", "+auxMax+");";
+				
+				statement.executeUpdate(insertSql);
+				result = "Se agrego la Metrica";
+			
 
-				System.out.println(resultSet.getString(1) + " " + resultSet.getString(2));
-			}
-			wirteJson(appList, "apps");
-			//connection.close();
+			// wirteJson(appList, "version");
+			// connection.close();
 
 		} catch (SQLException e) {
 
 			e.printStackTrace();
+			result = "No se Registro, Verifique la informacion";
 		}
-		// System.out.println("*********************************After while " +
-		// arrayList.size());
-		return localDir + "\\Resources\\apps.json";
+
+		return result;
+
 
 	}
 
@@ -323,6 +322,53 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 
 		return result;
 
+	}
+
+	@Override
+	public String insertCiclos(String name, int idVersionfk) {
+		conectar();
+		ResultSet resultSet = null;
+		Statement statement;
+		String result = "no";
+		System.out.println("----------------------------"+name+idVersionfk);
+		// JSONArray appList = new JSONArray();
+		try {
+
+			int auxMax = 0;
+
+			statement = connection.createStatement();
+
+
+			String insertverCiclosql = "insert into ciclos (ciclosName, version_fk) values('" + name+ "'," + idVersionfk
+					+ " );";
+				statement.executeUpdate(insertverCiclosql);
+				result = "Se agrego el Ciclo";
+
+			
+//				String selectTop = "SELECT TOP 1 * FROM apps ORDER BY idApp DESC";
+//
+//				resultSet = statement.executeQuery(selectTop);
+//				if (resultSet.next()) {
+//					auxMax = resultSet.getInt(1) + 1;
+//				}
+//				String insertAppSql = "insert into apps (appName) values('" + name + "');";
+//				String insertverSql = "insert into version (versionName, app_fk) values('" + name + "'," + auxMax
+//						+ " );";
+//				statement.executeUpdate(insertAppSql);
+//				statement.executeUpdate(insertverSql);
+//				result = "Se agrego la App";
+			
+
+			// wirteJson(appList, "version");
+			// connection.close();
+
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+			result = "No se Registro, Verifique la informacion";
+		}
+
+		return result;
 	}
 
 }

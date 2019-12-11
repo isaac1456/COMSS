@@ -11,14 +11,14 @@ public class DataSources {
 			+ "<br><br><b>Severity 3</b> - Minor problem<br>Inability to use a function of the "
 			+ "system occurs, but it does not seriously affect the user's operations.";
 
-	public static final TreeNode appRoot = new Functions.AppTreeNode("root",
-			new Functions.AppTreeNode("Marketing", new Functions.AppTreeNode("Advertising"),
-					new Functions.AppTreeNode("Community Relations")),
-			new Functions.AppTreeNode("Sales", new Functions.AppTreeNode("Channel Sales"),
-					new Functions.AppTreeNode("Direct Sales")),
-			new Functions.AppTreeNode("Manufacturing", new Functions.AppTreeNode("Design"),
-					new Functions.AppTreeNode("Development"), new Functions.AppTreeNode("QA")),
-			new Functions.AppTreeNode("Services", new Functions.AppTreeNode("Support"),
-					new Functions.AppTreeNode("Consulting")));
+	public static final TreeNode appRoot = new Funciones.AppTreeNode("root",
+			new Funciones.AppTreeNode("Marketing", new Funciones.AppTreeNode("Advertising"),
+					new Funciones.AppTreeNode("Community Relations")),
+			new Funciones.AppTreeNode("Sales", new Funciones.AppTreeNode("Channel Sales"),
+					new Funciones.AppTreeNode("Direct Sales")),
+			new Funciones.AppTreeNode("Manufacturing", new Funciones.AppTreeNode("Design"),
+					new Funciones.AppTreeNode("Development"), new Funciones.AppTreeNode("QA")),
+			new Funciones.AppTreeNode("Services", new Funciones.AppTreeNode("Support"),
+					new Funciones.AppTreeNode("Consulting")));
 
 }
