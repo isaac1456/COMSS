@@ -76,6 +76,7 @@ public class Comss implements EntryPoint {
 		final SelectItem cbxappsReg = new SelectItem("apps");
 		final SelectItem cbxapps = new SelectItem("apps");
 		final SelectItem cbxVersion = new SelectItem();
+		//DataSource dataVersion = null; 
 		gsa.selectApp(new AsyncCallback<String>() {
 
 			@Override
@@ -123,8 +124,12 @@ public class Comss implements EntryPoint {
 					public void onSuccess(String result) {
 
 						formApp.clearValue("cbxVersionName");
+				
+			
 						DataSource dataVersion = dataAppObjVersion.getInstance();
 						cbxVersion.setOptionDataSource(dataVersion);
+						//SC.say(dataVersion.getAttribute("idVersion"));
+				
 					}
 				});
 			}
@@ -417,13 +422,7 @@ public class Comss implements EntryPoint {
 		IntegerRangeValidator integerRangeValidator = new IntegerRangeValidator();
 		integerRangeValidator.setMin(0);
 		integerRangeValidator.setMax(100);
-		
-		final TextItem casesExecute = new TextItem();
-		casesExecute.setTitle("Casos Ejecutados");
-		casesExecute.setWidth(240);
-		casesExecute.setCanEdit(false);
-		casesExecute.setRequired(true);
-
+	
 		final TextItem casesSuccess = new TextItem();
 		casesSuccess.setTitle("Casos Exitosos");
 		casesSuccess.setWidth(240);
@@ -623,7 +622,7 @@ public class Comss implements EntryPoint {
 		formApp.setFields(
 				new FormItem[] { cbxapps, cbxVersion, txtNameCiclo, chkEfec, chkBug, chkReqFun, chkEDD, btnSaveData });
 
-		final FormItem[] fiMetrics = new FormItem[] {casesExecute, casesSuccess, casesFailed, bugFixed, bugFound, reqComplete,
+		final FormItem[] fiMetrics = new FormItem[] { casesSuccess, casesFailed, bugFixed, bugFound, reqComplete,
 				reqInComplete, errorFoundBef, errorFoundAft };
 
 		btnSaveData.setName("btnSaveData");
@@ -652,23 +651,21 @@ public class Comss implements EntryPoint {
 								if (formItem.getDisplayValue().equalsIgnoreCase("")) {
 									formItem.setErrors("Is Requerid");
 
-								} else {
-									aux = aux + " -" + formItem.getTitle() + " - "+formItem.getDisplayValue();
-									gsa.insertMetrics(formItem.getTitle(), Float.parseFloat(formItem.getDisplayValue()), new AsyncCallback<String>() {
-										
-										@Override
-										public void onSuccess(String result) {
-											// TODO Auto-generated method stub
-											
-										}
-										
-										@Override
-										public void onFailure(Throwable caught) {
-											// TODO Auto-generated method stub
-											
-										}
-									});
-								}
+								} /*
+									 * else { aux = aux + " -" + formItem.getTitle() +
+									 * " - "+formItem.getDisplayValue(); gsa.insertMetrics(formItem.getTitle(),
+									 * Float.parseFloat(formItem.getDisplayValue()), new AsyncCallback<String>() {
+									 * 
+									 * @Override public void onSuccess(String result) { // TODO Auto-generated
+									 * method stub
+									 * 
+									 * }
+									 * 
+									 * @Override public void onFailure(Throwable caught) { // TODO Auto-generated
+									 * method stub
+									 * 
+									 * } }); }
+									 */
 
 							}
 							//SC.say(aux);
@@ -676,14 +673,75 @@ public class Comss implements EntryPoint {
 						}
 						if (chkEfec.getValue().equals(true)) {
 
-							SC.say(aux);
+							nameMetric = "Efectividad ";
+							float A = Float.parseFloat(casesSuccess.getDisplayValue());
+							float B = Float.parseFloat(casesFailed.getDisplayValue());
+							float por = Funciones.calEfeciencia(A, B);
+							gsa.insertMetrics(nameMetric, por, new AsyncCallback<String>() {
+								
+								@Override
+								public void onSuccess(String result) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void onFailure(Throwable caught) {
+									// TODO Auto-generated method stub
+									
+								}
+							});
+							gsa.insertMetrics("Total de casos ejecutados", A+B, new AsyncCallback<String>() {
+								
+								@Override
+								public void onSuccess(String result) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void onFailure(Throwable caught) {
+									// TODO Auto-generated method stub
+									
+								}
+							});
 						}
 						if (chkReqFun.getValue().equals(true)) {
 
-							SC.say(aux);
+							float A = Float.parseFloat(reqComplete.getDisplayValue());
+							float B = Float.parseFloat(reqInComplete.getDisplayValue());
+							float por = Funciones.calEfeciencia(A, B);
+							gsa.insertMetrics("% de Funciones Completadas", por, new AsyncCallback<String>() {
+								
+								@Override
+								public void onSuccess(String result) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void onFailure(Throwable caught) {
+									// TODO Auto-generated method stub
+									
+								}
+							});
+							gsa.insertMetrics("N. Total de Requerimientos Funcionales", A+B, new AsyncCallback<String>() {
+								
+								@Override
+								public void onSuccess(String result) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void onFailure(Throwable caught) {
+									// TODO Auto-generated method stub
+									
+								}
+							});
 						}
 						if (chkBug.getValue().equals(true)) {
-							nameMetric = "Levantamiento de defectos ";
+							nameMetric = "% de defectos ";
 							float A = Float.parseFloat(bugFixed.getDisplayValue());
 							float B = Float.parseFloat(bugFound.getDisplayValue());
 							float por = Funciones.calBugs(A, B);
@@ -701,9 +759,21 @@ public class Comss implements EntryPoint {
 									
 								}
 							});
-						//	SC.say("" + por);
-							SC.say(aux);
-							// 
+							gsa.insertMetrics("N. Bug Corregidos", A, new AsyncCallback<String>() {
+								
+								@Override
+								public void onSuccess(String result) {
+									// TODO Auto-generated method stub
+									
+								}
+								
+								@Override
+								public void onFailure(Throwable caught) {
+									// TODO Auto-generated method stub
+									
+								}
+							});
+					
 						}
 						if (chkEDD.getValue().equals(true)) {
 							nameMetric = "Eficacia de la Eliminacion de Defectos";
@@ -739,7 +809,9 @@ public class Comss implements EntryPoint {
 					}
 				});
 				
-				
+			formApp.reset();
+			formApp.redraw();
+	//	formmetricsField.cle
 
 			}
 		});

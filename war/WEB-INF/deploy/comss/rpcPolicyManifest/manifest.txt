@@ -1,2 +1,3 @@
 # Module comss
 # RPC service class, partial path of RPC policy file
+com.ss.client.GreetingService, F36D20E5838B4D7C1DA10E3E080E998A.gwt.rpc

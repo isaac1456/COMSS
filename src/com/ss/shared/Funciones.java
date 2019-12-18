@@ -35,10 +35,10 @@ public class Funciones {
 	        }  
 	    }  
 	 
-	 public static float calEfectividad(float A, float B) {
-		return (A*100)/B;
-	}
 	 
+	 public static float calEfeciencia(float A, float B) {
+			return A/(A+B);
+		}
 	 public static float calFuncion(float A, float B) {
 			return (1 - A)/B;
 		}

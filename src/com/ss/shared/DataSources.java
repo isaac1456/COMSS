@@ -13,7 +13,7 @@ public class DataSources {
 
 	public static final TreeNode appRoot = new Funciones.AppTreeNode("root",
 			new Funciones.AppTreeNode("Marketing", new Funciones.AppTreeNode("Advertising"),
-					new Funciones.AppTreeNode("Community Relations")),
+					new Funciones.AppTreeNode("Community Relations")), 	
 			new Funciones.AppTreeNode("Sales", new Funciones.AppTreeNode("Channel Sales"),
 					new Funciones.AppTreeNode("Direct Sales")),
 			new Funciones.AppTreeNode("Manufacturing", new Funciones.AppTreeNode("Design"),

@@ -27,7 +27,7 @@ public class dataAppObj extends DataSource {
       //  DataSourceField versionName = new DataSourceField("versionName",FieldType.TEXT, "Name Version");
 		 
         setFields(idApp, appName);  
-        setDataURL("\\Resources\\apps.json");  
+        setDataURL("/Resources/apps.json");  
     }  
 
 }  

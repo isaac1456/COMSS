@@ -156,7 +156,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 		ResultSet resultSet = null;
 		Statement statement;
 		String result = "no";
-		System.out.println("----------------------------");
+		System.out.println("---------------------------- VERSIOn"+ id);
 		JSONArray appList = new JSONArray();
 		try {
 
