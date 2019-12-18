@@ -15,5 +15,6 @@ public interface GreetingService extends RemoteService {
 	String selectAppaVersion();
 	String saveAppVersion(String app, String version, boolean aux);
 	String insertCiclos(String name, int idVersionfk);
+	String[] reporteCiclos(int idApp, int idVersion);
 	
 }

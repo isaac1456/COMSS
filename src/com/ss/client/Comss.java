@@ -28,6 +28,7 @@ import com.smartgwt.client.widgets.form.fields.events.ClickHandler;
 import com.smartgwt.client.widgets.form.validator.IntegerRangeValidator;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
+import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.tab.Tab;
 import com.smartgwt.client.widgets.tab.TabSet;
@@ -76,7 +77,7 @@ public class Comss implements EntryPoint {
 		final SelectItem cbxappsReg = new SelectItem("apps");
 		final SelectItem cbxapps = new SelectItem("apps");
 		final SelectItem cbxVersion = new SelectItem();
-		//DataSource dataVersion = null; 
+		// DataSource dataVersion = null;
 		gsa.selectApp(new AsyncCallback<String>() {
 
 			@Override
@@ -124,12 +125,11 @@ public class Comss implements EntryPoint {
 					public void onSuccess(String result) {
 
 						formApp.clearValue("cbxVersionName");
-				
-			
+
 						DataSource dataVersion = dataAppObjVersion.getInstance();
 						cbxVersion.setOptionDataSource(dataVersion);
-						//SC.say(dataVersion.getAttribute("idVersion"));
-				
+						// SC.say(dataVersion.getAttribute("idVersion"));
+
 					}
 				});
 			}
@@ -188,7 +188,7 @@ public class Comss implements EntryPoint {
 
 		final DynamicForm formResult = new DynamicForm();
 		formResult.setWidth(500);
-
+		VLayout layoutRsult = new VLayout(15);
 		Tree tree = new Tree();
 		tree.setRoot(DataSources.appRoot);
 
@@ -198,9 +198,75 @@ public class Comss implements EntryPoint {
 		iptiApp.setValueTree(tree);
 		iptiApp.setWidth(240);
 
-		formResult.setItems(new FormItem[] { iptiApp });
+		final ListGrid resultGrid = new ListGrid();
+		resultGrid.setWidth100();
+		resultGrid.setHeight100();
+		resultGrid.setShowAllRecords(true);
+		resultGrid.setCanResizeFields(true);
 
-		tTabResult.setPane(formResult);
+		final ButtonItem btnSearchCiclos = new ButtonItem();
+		btnSearchCiclos.setName("btnSearchCiclos");
+		btnSearchCiclos.setTitle("Buscar Ciclo");
+		btnSearchCiclos.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				gsa.reporteCiclos(1, 3, new AsyncCallback<String[]>() {
+
+					@Override
+					public void onSuccess(String[] result) {
+						String[] headColumn = result[0].split(",");
+						ListGridField[] fields= new ListGridField[headColumn.length];
+							for (int i = 0; i < headColumn.length; i++) {
+								fields[i] = new ListGridField(headColumn[i],headColumn[i] ); 
+							}
+					//		SC.say(result[0]+"-"+result[1]+"-"+result[2]);
+						
+						
+							
+					
+						
+						
+					
+						/*
+						 * ListGridField headColums = new ListGridField(headColumn[0]); ListGridField
+						 * headColums1 = new ListGridField(headColumn[1]); ListGridField headColums2 =
+						 * new ListGridField(headColumn[2]);
+						 * 
+						 * 
+						 * 
+						 */
+						/*
+						 * ListGridRecord[] gridRecords = new ListGridRecord[result.length]; for (int i
+						 * = 0; i < result.length; i++) { String[] nameField = result[i].split(",");
+						 * gridRecords[i] = new ListGridRecord(); for (int j = 0; j < nameField.length;
+						 * j++) { gridRecords[i].setAttribute(nameField[j], nameField[j]); }
+						 * 
+						 * }
+						 */
+					
+						resultGrid.setFields(fields);
+						resultGrid.setData(createListGridRecords(result));
+					//	resultGrid.refreshFields();
+						
+
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+				});
+
+			}
+		});
+
+		formResult.setItems(new FormItem[] { iptiApp, btnSearchCiclos });
+		layoutRsult.addMember(formResult);
+		layoutRsult.addMember(resultGrid);
+
+		tTabResult.setPane(layoutRsult);
 		VLayout layoutRegister = new VLayout(15);
 		final ListGrid listGrid = new ListGrid();
 		final DynamicForm formRegisterApp = new DynamicForm();
@@ -422,7 +488,7 @@ public class Comss implements EntryPoint {
 		IntegerRangeValidator integerRangeValidator = new IntegerRangeValidator();
 		integerRangeValidator.setMin(0);
 		integerRangeValidator.setMax(100);
-	
+
 		final TextItem casesSuccess = new TextItem();
 		casesSuccess.setTitle("Casos Exitosos");
 		casesSuccess.setWidth(240);
@@ -436,8 +502,6 @@ public class Comss implements EntryPoint {
 		casesFailed.hide();
 		casesFailed.setKeyPressFilter("[0-9.]");
 		casesFailed.setValidators(integerRangeValidator);
-
-		
 
 		final TextItem bugFound = new TextItem();
 		bugFound.setTitle("Bugs Encontrados");
@@ -533,11 +597,11 @@ public class Comss implements EntryPoint {
 				if ((Boolean) event.getValue()) {
 					casesSuccess.show();
 					casesFailed.show();
-					
+
 				} else {
 					casesSuccess.hide();
 					casesFailed.hide();
-				
+
 				}
 
 			}
@@ -639,7 +703,7 @@ public class Comss implements EntryPoint {
 
 				// SC.say(idVersion+" - "+nameCiclo);
 				gsa.insertCiclos(nameCiclo, idVers, new AsyncCallback<String>() {
-					
+
 					@Override
 					public void onSuccess(String result) {
 						String aux = "";
@@ -668,7 +732,7 @@ public class Comss implements EntryPoint {
 									 */
 
 							}
-							//SC.say(aux);
+							// SC.say(aux);
 
 						}
 						if (chkEfec.getValue().equals(true)) {
@@ -678,31 +742,31 @@ public class Comss implements EntryPoint {
 							float B = Float.parseFloat(casesFailed.getDisplayValue());
 							float por = Funciones.calEfeciencia(A, B);
 							gsa.insertMetrics(nameMetric, por, new AsyncCallback<String>() {
-								
+
 								@Override
 								public void onSuccess(String result) {
 									// TODO Auto-generated method stub
-									
+
 								}
-								
+
 								@Override
 								public void onFailure(Throwable caught) {
 									// TODO Auto-generated method stub
-									
+
 								}
 							});
-							gsa.insertMetrics("Total de casos ejecutados", A+B, new AsyncCallback<String>() {
-								
+							gsa.insertMetrics("Total de casos ejecutados", A + B, new AsyncCallback<String>() {
+
 								@Override
 								public void onSuccess(String result) {
 									// TODO Auto-generated method stub
-									
+
 								}
-								
+
 								@Override
 								public void onFailure(Throwable caught) {
 									// TODO Auto-generated method stub
-									
+
 								}
 							});
 						}
@@ -712,33 +776,34 @@ public class Comss implements EntryPoint {
 							float B = Float.parseFloat(reqInComplete.getDisplayValue());
 							float por = Funciones.calEfeciencia(A, B);
 							gsa.insertMetrics("% de Funciones Completadas", por, new AsyncCallback<String>() {
-								
+
 								@Override
 								public void onSuccess(String result) {
 									// TODO Auto-generated method stub
-									
+
 								}
-								
+
 								@Override
 								public void onFailure(Throwable caught) {
 									// TODO Auto-generated method stub
-									
+
 								}
 							});
-							gsa.insertMetrics("N. Total de Requerimientos Funcionales", A+B, new AsyncCallback<String>() {
-								
-								@Override
-								public void onSuccess(String result) {
-									// TODO Auto-generated method stub
-									
-								}
-								
-								@Override
-								public void onFailure(Throwable caught) {
-									// TODO Auto-generated method stub
-									
-								}
-							});
+							gsa.insertMetrics("N. Total de Requerimientos Funcionales", A + B,
+									new AsyncCallback<String>() {
+
+										@Override
+										public void onSuccess(String result) {
+											// TODO Auto-generated method stub
+
+										}
+
+										@Override
+										public void onFailure(Throwable caught) {
+											// TODO Auto-generated method stub
+
+										}
+									});
 						}
 						if (chkBug.getValue().equals(true)) {
 							nameMetric = "% de defectos ";
@@ -746,72 +811,69 @@ public class Comss implements EntryPoint {
 							float B = Float.parseFloat(bugFound.getDisplayValue());
 							float por = Funciones.calBugs(A, B);
 							gsa.insertMetrics(nameMetric, por, new AsyncCallback<String>() {
-								
+
 								@Override
 								public void onSuccess(String result) {
-									
-									
+
 								}
-								
+
 								@Override
 								public void onFailure(Throwable caught) {
 									// TODO Auto-generated method stub
-									
+
 								}
 							});
 							gsa.insertMetrics("N. Bug Corregidos", A, new AsyncCallback<String>() {
-								
+
 								@Override
 								public void onSuccess(String result) {
 									// TODO Auto-generated method stub
-									
+
 								}
-								
+
 								@Override
 								public void onFailure(Throwable caught) {
 									// TODO Auto-generated method stub
-									
+
 								}
 							});
-					
+
 						}
 						if (chkEDD.getValue().equals(true)) {
 							nameMetric = "Eficacia de la Eliminacion de Defectos";
 							float E = Float.parseFloat(errorFoundBef.getDisplayValue());
 							float D = Float.parseFloat(errorFoundAft.getDisplayValue());
-							float por = Funciones.EED(E, D); 
+							float por = Funciones.EED(E, D);
 							gsa.insertMetrics(nameMetric, por, new AsyncCallback<String>() {
-								
+
 								@Override
 								public void onSuccess(String result) {
 									// TODO Auto-generated method stub
-									
+
 								}
-								
+
 								@Override
 								public void onFailure(Throwable caught) {
 									// TODO Auto-generated method stub
-									
+
 								}
 							});
-							
-							
 
-							//SC.say(aux);
+							// SC.say(aux);
 						}
-						
+
 					}
-					
+
 					@Override
 					public void onFailure(Throwable caught) {
 						// TODO Auto-generated method stub
-						
+
 					}
 				});
-				
-			formApp.reset();
-			formApp.redraw();
-	//	formmetricsField.cle
+
+				// formApp.reset();
+				// formApp.redraw();
+				// formmetricsField.cle
 
 			}
 		});
@@ -820,7 +882,10 @@ public class Comss implements EntryPoint {
 		 * formmetricsField.setFields(new FormItem[] { casesSuccess, casesFailed,
 		 * porEfect, bugFound, bugFixed, porBugFixed, reqComplete, reqInComplete,
 		 * porComplete, errorFoundBef, errorFoundAft, EED });
-		 */ formmetricsField.setFields(fiMetrics);
+		 * 
+		 */
+
+		formmetricsField.setFields(fiMetrics);
 
 		layoutApp.setMembers(formApp, formmetricsField);
 
@@ -829,4 +894,21 @@ public class Comss implements EntryPoint {
 		System.out.println("Result on post+result+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
 	}
+
+	public ListGridRecord[] createListGridRecords(String[] records) {
+		ListGridRecord[] result = new ListGridRecord[records.length];
+		String[] fieldNames = records[0].split(",");
+		for (int recordIndex = 1; recordIndex < records.length; ++recordIndex) {
+			String[] fieldValues = records[recordIndex].split(",");
+			result[recordIndex] = new ListGridRecord();
+			for (int fieldIndex = 0; fieldIndex < fieldValues.length; ++fieldIndex) {
+				result[recordIndex].setAttribute(fieldNames[fieldIndex], fieldValues[fieldIndex]);
+			}
+		}
+		return result;
+	}
+	
+	
+	
+	
 }

@@ -8,6 +8,7 @@ import co.com.ss.models.AppObj;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -98,7 +99,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 				System.out.println(resultSet.getString(1) + " " + resultSet.getString(2));
 			}
 			wirteJson(appList, "apps");
-			//connection.close();
+			// connection.close();
 
 		} catch (SQLException e) {
 
@@ -122,20 +123,17 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 
 			statement = connection.createStatement();
 
-		
-			
-			
-				String selectTop = "SELECT TOP 1 * FROM ciclos ORDER BY idCiclos DESC;";
+			String selectTop = "SELECT TOP 1 * FROM ciclos ORDER BY idCiclos DESC;";
 
-				resultSet = statement.executeQuery(selectTop);
-				if (resultSet.next()) {
-					auxMax = resultSet.getInt(1);
-				}
-				String insertSql = "insert into metrics (metricName, metricValue, ciclos_fk) values('" + nameMetrics + "', "+valueMetric+", "+auxMax+");";
-				
-				statement.executeUpdate(insertSql);
-				result = "Se agrego la Metrica";
-			
+			resultSet = statement.executeQuery(selectTop);
+			if (resultSet.next()) {
+				auxMax = resultSet.getInt(1);
+			}
+			String insertSql = "insert into metrics (metricName, metricValue, ciclos_fk) values('" + nameMetrics + "', "
+					+ valueMetric + ", " + auxMax + ");";
+
+			statement.executeUpdate(insertSql);
+			result = "Se agrego la Metrica";
 
 			// wirteJson(appList, "version");
 			// connection.close();
@@ -148,7 +146,6 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 
 		return result;
 
-
 	}
 
 	public String validarVersion(String id) {
@@ -156,7 +153,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 		ResultSet resultSet = null;
 		Statement statement;
 		String result = "no";
-		System.out.println("---------------------------- VERSIOn"+ id);
+		System.out.println("---------------------------- VERSIOn" + id);
 		JSONArray appList = new JSONArray();
 		try {
 
@@ -175,7 +172,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 
 			}
 			wirteJson(appList, "version");
-			//connection.close();
+			// connection.close();
 
 		} catch (SQLException e) {
 
@@ -330,7 +327,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 		ResultSet resultSet = null;
 		Statement statement;
 		String result = "no";
-		System.out.println("----------------------------"+name+idVersionfk);
+		System.out.println("----------------------------" + name + idVersionfk);
 		// JSONArray appList = new JSONArray();
 		try {
 
@@ -338,13 +335,11 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 
 			statement = connection.createStatement();
 
+			String insertverCiclosql = "insert into ciclos (ciclosName, version_fk) values('" + name + "',"
+					+ idVersionfk + " );";
+			statement.executeUpdate(insertverCiclosql);
+			result = "Se agrego el Ciclo";
 
-			String insertverCiclosql = "insert into ciclos (ciclosName, version_fk) values('" + name+ "'," + idVersionfk
-					+ " );";
-				statement.executeUpdate(insertverCiclosql);
-				result = "Se agrego el Ciclo";
-
-			
 //				String selectTop = "SELECT TOP 1 * FROM apps ORDER BY idApp DESC";
 //
 //				resultSet = statement.executeQuery(selectTop);
@@ -357,7 +352,6 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 //				statement.executeUpdate(insertAppSql);
 //				statement.executeUpdate(insertverSql);
 //				result = "Se agrego la App";
-			
 
 			// wirteJson(appList, "version");
 			// connection.close();
@@ -366,6 +360,67 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
 
 			e.printStackTrace();
 			result = "No se Registro, Verifique la informacion";
+		}
+
+		return result;
+	}
+
+	@Override
+	public String[] reporteCiclos(int idApp, int idVersion) {
+		conectar();
+		ResultSet resultSet = null;
+		CallableStatement cstmt;
+
+		String[] result = new String[8];
+		int results = 0;
+		String auxHead ="";
+		String auxRow ="";
+		System.out.println("---------------------------- VERSIOn: " + idApp);
+		// JSONArray appList = new JSONArray();
+		try {
+
+			cstmt = connection.prepareCall("{call report(?)}");
+			cstmt.setString(1, ""+idVersion);
+			resultSet = cstmt.executeQuery();
+
+			for (int x = 1; x <= resultSet.getMetaData().getColumnCount(); x++) {
+				//results++; 
+				System.out.print(resultSet.getMetaData().getColumnName(x) + "\t");
+				//result[results][x] = resultSet.getMetaData().getColumnName(x); 
+				 auxHead =resultSet.getMetaData().getColumnName(x)+","+auxHead;
+			}
+			result[results] = auxHead; 
+			System.out.println(auxHead);
+			while (resultSet.next()) {
+				results++; 
+				//results=0;
+				/*
+				 * JSONObject appdetails = new JSONObject();
+				 * 
+				 * appdetails.put("idVersion", resultSet.getInt(1));
+				 * appdetails.put("versionName", resultSet.getString(2));
+				 * 
+				 * appList.add(appdetails);
+				 */
+				for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+					
+					System.out.print(resultSet.getString(i) + "\t");
+					//result[i][results] =resultSet.getString(i); 
+					auxRow = resultSet.getString(i)+","+auxRow;
+
+					
+				}
+				result[results] = auxRow; 
+				System.out.println(auxRow);
+
+			}
+
+			// wirteJson(appList, "version");
+			// connection.close();
+
+		} catch (SQLException e) {
+
+			e.printStackTrace();
 		}
 
 		return result;
