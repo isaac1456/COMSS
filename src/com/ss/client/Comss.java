@@ -77,6 +77,8 @@ public class Comss implements EntryPoint {
 		final SelectItem cbxappsReg = new SelectItem("apps");
 		final SelectItem cbxapps = new SelectItem("apps");
 		final SelectItem cbxVersion = new SelectItem();
+		final SelectItem cbxappsResult = new SelectItem("apps");
+		final SelectItem cbxVersionResult = new SelectItem();
 		// DataSource dataVersion = null;
 		gsa.selectApp(new AsyncCallback<String>() {
 
@@ -87,6 +89,8 @@ public class Comss implements EntryPoint {
 
 				cbxapps.setOptionDataSource(dataApp);
 				cbxappsReg.setOptionDataSource(dataApp);
+				cbxappsResult.setOptionDataSource(dataApp);
+				
 
 				// cbxVersion.setOptionDataSource(dataVersion);
 
@@ -124,7 +128,8 @@ public class Comss implements EntryPoint {
 					@Override
 					public void onSuccess(String result) {
 
-						formApp.clearValue("cbxVersionName");
+					//	formApp.clearValue("cbxVersionName");
+						cbxVersion.clearValue();
 
 						DataSource dataVersion = dataAppObjVersion.getInstance();
 						cbxVersion.setOptionDataSource(dataVersion);
@@ -192,11 +197,60 @@ public class Comss implements EntryPoint {
 		Tree tree = new Tree();
 		tree.setRoot(DataSources.appRoot);
 
-		IPickTreeItem iptiApp = new IPickTreeItem();
-		iptiApp.setTitle("Apps");
-		iptiApp.setValueField("name");
-		iptiApp.setValueTree(tree);
-		iptiApp.setWidth(240);
+		
+		// DataSource dataVersion = null;
+			cbxappsResult.setWidth(240);
+		cbxappsResult.setTitle("Apps");
+		cbxappsResult.setValueField("idApp");
+		cbxappsResult.setDisplayField("appName");
+		cbxappsResult.setName("cbxAppName");
+		cbxappsResult.setRequired(true);
+
+		cbxappsResult.setPickListFields(lgfNameApp);
+		cbxappsResult.setPickListWidth(240);
+
+		cbxappsResult.addChangedHandler(new ChangedHandler() {
+
+			@Override
+			public void onChanged(ChangedEvent event) {
+
+				gsa.validarVersion("" + event.getValue(), new AsyncCallback<String>() {
+
+					@Override
+					public void onFailure(Throwable caught) { // TODO Auto-generated
+
+					}
+
+					@Override
+					public void onSuccess(String result) {
+
+						//formApp.clearValue("cbxVersionName");
+						cbxVersionResult.clearValue();
+
+						DataSource dataVersion = dataAppObjVersion.getInstance();
+						cbxVersionResult.setOptionDataSource(dataVersion);
+						// SC.say(dataVersion.getAttribute("idVersion"));
+
+					}
+				});
+			}
+		});
+
+		cbxVersionResult.setWidth(240);
+		cbxVersionResult.setName("cbxVersionName");
+		cbxVersionResult.setTitle("Version");
+		cbxVersionResult.setValueField("idVersion");
+		cbxVersionResult.setDisplayField("versionName");
+		cbxVersionResult.setPickListFields(lgfidVersion, lgfVersion);
+		cbxVersionResult.setPickListWidth(240);
+//		cbxVersionResult.addChangedHandler(new ChangedHandler() {
+//
+//			@Override
+//			public void onChanged(ChangedEvent event) {
+//				txtNameCiclo.setDisabled(false);
+//
+//			}
+//		});
 
 		final ListGrid resultGrid = new ListGrid();
 		resultGrid.setWidth100();
@@ -211,7 +265,10 @@ public class Comss implements EntryPoint {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				gsa.reporteCiclos(1, 3, new AsyncCallback<String[]>() {
+				int idVers = Integer.parseInt(cbxVersionResult.getValues()[0]);
+				//SC.say(""+idVers);
+				
+				gsa.reporteCiclos(1, idVers, new AsyncCallback<String[]>() {
 
 					@Override
 					public void onSuccess(String[] result) {
@@ -220,31 +277,7 @@ public class Comss implements EntryPoint {
 							for (int i = 0; i < headColumn.length; i++) {
 								fields[i] = new ListGridField(headColumn[i],headColumn[i] ); 
 							}
-					//		SC.say(result[0]+"-"+result[1]+"-"+result[2]);
-						
-						
-							
-					
-						
-						
-					
-						/*
-						 * ListGridField headColums = new ListGridField(headColumn[0]); ListGridField
-						 * headColums1 = new ListGridField(headColumn[1]); ListGridField headColums2 =
-						 * new ListGridField(headColumn[2]);
-						 * 
-						 * 
-						 * 
-						 */
-						/*
-						 * ListGridRecord[] gridRecords = new ListGridRecord[result.length]; for (int i
-						 * = 0; i < result.length; i++) { String[] nameField = result[i].split(",");
-						 * gridRecords[i] = new ListGridRecord(); for (int j = 0; j < nameField.length;
-						 * j++) { gridRecords[i].setAttribute(nameField[j], nameField[j]); }
-						 * 
-						 * }
-						 */
-					
+								
 						resultGrid.setFields(fields);
 						resultGrid.setData(createListGridRecords(result));
 					//	resultGrid.refreshFields();
@@ -262,7 +295,7 @@ public class Comss implements EntryPoint {
 			}
 		});
 
-		formResult.setItems(new FormItem[] { iptiApp, btnSearchCiclos });
+		formResult.setItems(new FormItem[] { cbxappsResult, cbxVersionResult, btnSearchCiclos });
 		layoutRsult.addMember(formResult);
 		layoutRsult.addMember(resultGrid);
 
@@ -299,7 +332,7 @@ public class Comss implements EntryPoint {
 
 						name = cbxappsReg.getDisplayValue();
 
-					} else {
+					} else if(cbxappsReg.isDisabled()) {
 						name = nameApp.getDisplayValue();
 						aux = false;
 					}
@@ -459,6 +492,34 @@ public class Comss implements EntryPoint {
 						// DataSource dataVersion = dataAppObjVersion.getInstance();
 
 						cbxapps.setOptionDataSource(dataApp);
+						// cbxVersion.setOptionDataSource(dataVersion);
+						cbxVersion.clearValue();
+
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+				});
+
+			}
+		});
+		tTabResult.addTabSelectedHandler(new TabSelectedHandler() {
+
+			@Override
+			public void onTabSelected(TabSelectedEvent event) {
+				gsa.selectApp(new AsyncCallback<String>() {
+
+					@Override
+					public void onSuccess(String result) {
+						cbxappsResult.clearValue();
+						DataSource dataApp = dataAppObj.getInstance();
+						// DataSource dataVersion = dataAppObjVersion.getInstance();
+
+						cbxappsResult.setOptionDataSource(dataApp);
+						cbxVersionResult.clearValue();
 						// cbxVersion.setOptionDataSource(dataVersion);
 
 					}
@@ -874,7 +935,10 @@ public class Comss implements EntryPoint {
 				// formApp.reset();
 				// formApp.redraw();
 				// formmetricsField.cle
-
+				SC.say("Se Registraron las Metricas");
+				//formApp.reset();
+				//formmetricsField.resetValues();
+				
 			}
 		});
 
